@@ -155,9 +155,17 @@ HDIcat_bar <- ggplot(data = alldata, aes(x = HDI_cat)) +
 grid.arrange(HDIindex_hist, HDIcat_bar, nrow = 1)
 ```
 
+```{r HDIsumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+HDIsumm <- broom::tidy(round(summary(alldata$HDIindex), digits = 4))
+sd <- round(sd(alldata$HDIindex), digits = 4)
+HDIsumm <- cbind(HDIsumm, sd) %>% 
+  kable(format = "markdown")
+HDIsumm
+```
+
 Exploring the Social Progress Index data:
 
-```{r SPIplot, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+```{r SPIplot, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE}
 SPI_hist <- ggplot(data = alldata, aes(x = SPI)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$SPI))))) +
   xlab("Social Progress Index") +
@@ -166,10 +174,20 @@ SPI_hist <- ggplot(data = alldata, aes(x = SPI)) +
 SPI_hist
 ```
 
+```{r SPIsumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+SPIsumm <- broom::tidy(round(summary(alldata$SPI), digits = 4))
+sd <- round(sd(alldata$SPI), digits = 4)
+SPIsumm <- cbind(SPIsumm, sd) %>% 
+  kable(format = "markdown")
+SPIsumm
+```
+
 Next, exploring GDP by summary statistics:
 
-```{r GDPsumm, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
-GDPsumm <- broom::tidy(round(summary(alldata$GDP_USD_2018 / 1000000), digits = 4)) %>% 
+```{r GDPsumm, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE}
+GDPsumm <- broom::tidy(round(summary(alldata$GDP_USD_2018 / 1000000), digits = 4))
+sd <- round(sd(alldata$GDP_USD_2018 / 1000000), digits = 4)
+GDPsumm <- cbind(GDPsumm, sd) %>% 
   kable(format = "markdown")
 GDPsumm
 ```
@@ -186,6 +204,14 @@ GDP_hist <- ggplot(data = alldata, aes(x = log(GDP_USD_2018))) +
 GDP_hist
 ```
 
+```{r logGDPsumm, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE}
+logGDPsumm <- broom::tidy(round(summary(alldata$logGDP), digits = 4))
+sd <- round(sd(alldata$logGDP), digits = 4)
+logGDPsumm <- cbind(logGDPsumm, sd) %>% 
+  kable(format = "markdown")
+logGDPsumm
+```
+
 Exploring the World Happiness Report data:
 
 ```{r happinessplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
@@ -195,6 +221,14 @@ happiness_hist <- ggplot(data = alldata, aes(happiness)) +
   ylab("Count") +
   ggtitle("Happiness Score Distribution")
 happiness_hist
+```
+
+```{r happinesssumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+happinesssumm <- broom::tidy(round(summary(alldata$happiness), digits = 4))
+sd <- round(sd(alldata$happiness), digits = 4)
+happinesssumm <- cbind(happinesssumm, sd) %>% 
+  kable(format = "markdown")
+happinesssumm
 ```
 
 Exploring the gender equality index data:
@@ -208,6 +242,14 @@ gender_hist <- ggplot(data = alldata, aes(x = genderequality_index)) +
 gender_hist
 ```
 
+```{r gendersumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+gendersumm <- broom::tidy(round(summary(alldata$genderequality_index), digits = 4))
+sd <- round(sd(alldata$genderequality_index), digits = 4)
+gendersumm <- cbind(gendersumm, sd) %>% 
+  kable(format = "markdown")
+gendersumm
+```
+
 Exploring the WHO infant mortality rate data:
 
 ```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
@@ -217,6 +259,14 @@ infantmort_hist <- ggplot(data = alldata, aes(x = infantmort)) +
   ylab("Count") +
   ggtitle("Infant Mortality Distribution")
 infantmort_hist
+```
+
+```{r infantmortsumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+infantmortsumm <- broom::tidy(round(summary(alldata$infantmort), digits = 4))
+sd <- round(sd(alldata$infantmort), digits = 4)
+infantmortsumm <- cbind(infantmortsumm, sd) %>% 
+  kable(format = "markdown")
+infantmortsumm
 ```
 
 Exploring the WHO life expectancy data:
@@ -246,6 +296,26 @@ grid.arrange(lifeexp_birth_box, lifeexp_sixty_box, nrow = 1,
                             gp = gpar(fontsize = 16, fontface = "bold", col = "#545454")))
 ```
 
+```{r lifeexp_summ, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+# Total Life Expectancy at Birth
+
+birth_MFsumm <- broom::tidy(round(summary(alldata$birth_MF), digits = 4))
+sd <- round(sd(alldata$birth_MF), digits = 4)
+birth_MFsumm <- cbind(birth_MFsumm, sd) %>% 
+  kable(format = "markdown")
+birth_MFsumm
+
+# Total Life Expectancy at Sixty
+
+sixty_MFsumm <- broom::tidy(round(summary(alldata$sixty_MF), digits = 4))
+sd <- round(sd(alldata$sixty_MF), digits = 4)
+sixty_MFsumm <- cbind(sixty_MFsumm, sd) %>% 
+  kable(format = "markdown")
+sixty_MFsumm
+```
+
+<!-- Reevaluate whether the corrplot is needed here -->
+
 Investigating pairwise relationships between continuous variables:
 
 ```{r calc_corrplot, include = TRUE, echo = TRUE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 8}
@@ -261,3 +331,5 @@ corrplot
 Strong positive linear relationships are seen between `HDIindex` and `SPI`, `happiness`, and `birth_MF`; between `SPI` and `happiness`, `birth_MF`, and `sixty_MF`; and between `happiness` and `sixty_MF`.  Additionally, strong positive relationships that are possibly nonlinear are seen between `HDI_index` and `sixty_MF`, and between `birth_MF` and `sixty_MF`.
 
 Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  A strong negative nonlinear relationship is seen between `infantmort` and `sixty_MF`.
+
+
