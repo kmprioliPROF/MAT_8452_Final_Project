@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+OLD_generate_dataset.Rmd
+data/compdata.csv
+data/OLD/
+generate_dataset.Rmd

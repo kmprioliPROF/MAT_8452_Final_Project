@@ -1,0 +1,263 @@
+---
+title: "Comparing Quality of Life by Human Development Category:  Parametric vs. Nonparametric Approaches"
+author: "Katherine M. Prioli"
+date: "December 16, 2018"
+output:
+  pdf_document: default
+  html_document: default
+geometry: margin = 0.5in
+references:
+- URL: https://github.com/kmprioliPROF/MAT_8790_Final_Project
+  author:
+  - family: Prioli
+    given: Katherine M.
+  id: kmpgit
+  issued:
+    month: 12
+    year: 2018
+  title: MAT_8790_Final_Project
+- URL: http://apps.who.int/gho/data/view.main.SDG2016LEXv?lang=en
+  author:
+  - family: World Health Organization
+  id: who_life
+  issued:
+    year: 2018
+  title: Life Expectancy
+- URL: http://apps.who.int/gho/data/view.main.182?lang=en
+  author:
+  - family: World Health Organization
+  id: who_infantmort
+  issued:
+    year: 2018
+  title: Probability of Dying per 1000 Live Births
+- URL: http://reports.weforum.org/global-gender-gap-report-2016/rankings/
+  author:
+  - family: World Economic Forum
+  id: wef_gender
+  issued:
+    year: 2016
+  title: Gender Equality
+- URL: https://data.worldbank.org/indicator/ny.gdp.mktp.cd?view=map&year_high_desc=true 
+  author:
+  - family: The World Bank
+  id: worldbank_gdp
+  issued:
+    year: 2018
+  title: Gross Domestic Product
+- URL: http://hdr.undp.org/en/data
+  author:
+  - family: The United Nations Development Programme
+  id: un_dvlpt
+  issued:
+    year: 2018
+  title: Human Development Index
+- URL: https://www.socialprogress.org/?tab=4
+  author:
+  - family: Social Progress Imperative
+  id: socialprog
+  issued:
+    year: 2018
+  title: Social Progress Index
+- URL: http://worldhappiness.report/ed/2018/
+  author:
+  - family: World Happiness Report
+  id: whr
+  issued:
+    year: 2018
+  title: World Happiness Report
+---
+
+## **Background**
+
+
+
+## **Methods**
+
+
+<!-- Notes
+  * Briefly explain that dataset considered here is the one created for MAT 8790
+  * Explain data sources
+  * Perform exploratory data analysis (univariate visualizations, summary tables, correlation matrix)
+  * Conduct several analyses comparing parametric and nonparametric methods
+      1.  Compare results of significance testing of infant mortality rates by HDI_cat via ANOVA (parametric) and permutation F-test
+      2.  
+  * Comment on the appropriateness of nonparametric methods
+-->
+
+
+### **Loading libraries**
+
+```{r setup, include = FALSE, echo = FALSE, results = 'hide', warning = FALSE, message = FALSE}
+library(tidyverse)
+library(readxl)          # For importing .xls(x) datasets
+library(lazyeval)        # For renaming columns in function
+library(countrycode)     # For establishing uniform country identifiers
+library(ggthemr)         # For prettifying output
+library(gridExtra)       # For grid.arrange()
+library(grid)            # For textGrob() to annotate grid.arrange() elements
+library(kableExtra)      # For nicer output tables
+library(GGally)          # For ggpairs() correlation matrix
+
+ggthemr("fresh")
+```
+
+
+### **Importing data**
+
+```{r import_data, include = FALSE, echo = TRUE, message = FALSE, warning = FALSE}
+alldata <- read_csv("data/MAT_8790_alldata_2018-12-02.csv")
+alldata <- alldata %>% 
+  na.omit() %>% 
+  mutate(country = factor(country)) %>% 
+  mutate(HDI_cat = factor(HDI_cat, levels = c("Low", "Medium", "High", "Very High")))
+glimpse(alldata)
+
+len <- dim(alldata)[[1]]
+```
+
+The final dataframe, titled `alldata`, contains the following:
+
+| **Source**       	              | **Variable Name**    	| **Description**                                  	|
+|-------------------------------- |----------------------	|--------------------------------------------------	|
+| @socialprog      	              | SPI                  	| Social Progress Index value (scale of 0:100)     	|
+| @worldbank_gdp   	              | GDP_USD_2018         	| 2016 Gross Domestic Product (valued in $US 2018) 	|
+| @un_dvlpt        	              | HDIrank              	| Human Development Index ranking                  	|
+| @un_dvlpt        	              | HDIindex             	| HDI index value (scale of 0:1)                   	|
+| @un_dvlpt        	              | HDI_cat              	| HDI index category (5 levels)                    	|
+| @whr             	              | happiness            	| World Happiness Score (scale of 0:10)            	|
+| @wef_gender      	              | genderequality_index 	| Gender Equality Index (scale of 0:1)             	|
+| @who_infantmort  	              | infantmort           	| Infant mortality rate                            	|
+| @who_life        	              | birth_MF             	| Life expectancy at birth, males & females        	|
+| @who_life        	              | sixty_MF             	| Life expectancy at 60 years, males & females     	|
+
+
+### *Visualizations*
+
+Univariate and sensible bivariate analyses were generated to explore the data.
+
+First, exploring the Human Development Index variables:
+
+```{r HDIplots, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
+HDIindex_hist <- ggplot(data = alldata, aes(x = HDIindex)) +
+  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$HDIindex))))) +
+  xlab("Human Development Index") +
+  ylab("Count") +
+  ggtitle("Human Development Index Distribution")
+
+HDIcat_bar <- ggplot(data = alldata, aes(x = HDI_cat)) +
+  geom_bar() +
+  geom_text(stat = "count", aes(label = ..count..), color = "#233b43",
+            hjust = 0.5, position = position_stack(vjust = 0.5)) +
+  xlab("Human Development Category") +
+  ylab("Count") +
+  ggtitle("Human Development Index Counts \nby Category")
+
+grid.arrange(HDIindex_hist, HDIcat_bar, nrow = 1)
+```
+
+Exploring the Social Progress Index data:
+
+```{r SPIplot, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+SPI_hist <- ggplot(data = alldata, aes(x = SPI)) +
+  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$SPI))))) +
+  xlab("Social Progress Index") +
+  ylab("Count") +
+  ggtitle("Social Progress Index Distribution")
+SPI_hist
+```
+
+Next, exploring GDP by summary statistics:
+
+```{r GDPsumm, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+GDPsumm <- broom::tidy(round(summary(alldata$GDP_USD_2018 / 1000000), digits = 4)) %>% 
+  kable(format = "markdown")
+GDPsumm
+```
+
+Taking the log transform and plotting:
+
+```{r GDPplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+GDP_hist <- ggplot(data = alldata, aes(x = log(GDP_USD_2018))) +
+  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$GDP_USD_2018))))) +
+  xlab("log(GDP) ($US 2018)") +
+  ylab("Count") +
+  ggtitle("Gross Domestic Product Distribution, Log Transform") +
+  scale_x_continuous(labels = scales::dollar_format(prefix = "$"))
+GDP_hist
+```
+
+Exploring the World Happiness Report data:
+
+```{r happinessplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+happiness_hist <- ggplot(data = alldata, aes(happiness)) +
+  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$happiness))))) +
+  xlab("Happiness Score") +
+  ylab("Count") +
+  ggtitle("Happiness Score Distribution")
+happiness_hist
+```
+
+Exploring the gender equality index data:
+
+```{r genderplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+gender_hist <- ggplot(data = alldata, aes(x = genderequality_index)) +
+  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
+  xlab("Gender Equality Index") +
+  ylab("Count") +
+  ggtitle("Gender Equality Index Distribution")
+gender_hist
+```
+
+Exploring the WHO infant mortality rate data:
+
+```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+infantmort_hist <- ggplot(data = alldata, aes(x = infantmort)) + 
+  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
+  xlab("Probability of Infant Mortality") +
+  ylab("Count") +
+  ggtitle("Infant Mortality Distribution")
+infantmort_hist
+```
+
+Exploring the WHO life expectancy data:
+
+```{r lifeexpplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
+lifeexp_birth_box <- ggplot(data = alldata, aes(y = birth_MF)) +
+  geom_boxplot() +
+  ylim(50, 100) +
+  ylab("Total Life Expectancy (years)") +
+  ggtitle("...at Birth") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+lifeexp_sixty_box <- ggplot(data = alldata, aes(y = 60 + sixty_MF)) +
+  geom_boxplot() +
+  ylim(50, 100) +
+  ylab("") +
+  ggtitle("...at Age 60") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line.y.left = element_blank())
+
+grid.arrange(lifeexp_birth_box, lifeexp_sixty_box, nrow = 1,
+             top = textGrob("Total Life Expectancy...",
+                            gp = gpar(fontsize = 16, fontface = "bold", col = "#545454")))
+```
+
+Investigating pairwise relationships between continuous variables:
+
+```{r calc_corrplot, include = TRUE, echo = TRUE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 8}
+alldata <- alldata %>% mutate(logGDP = log(GDP_USD_2018))
+
+corrplot <- ggpairs(data = alldata, columns = c(5, 15, 8, 10:14),
+                    title = "Correlation Matrix, Continuous Variables")
+corrplot
+```
+
+<!-- Reevaluate the below in consideration of the na.omit() (may change some interpretations) -->
+
+Strong positive linear relationships are seen between `HDIindex` and `SPI`, `happiness`, and `birth_MF`; between `SPI` and `happiness`, `birth_MF`, and `sixty_MF`; and between `happiness` and `sixty_MF`.  Additionally, strong positive relationships that are possibly nonlinear are seen between `HDI_index` and `sixty_MF`, and between `birth_MF` and `sixty_MF`.
+
+Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  A strong negative nonlinear relationship is seen between `infantmort` and `sixty_MF`.
