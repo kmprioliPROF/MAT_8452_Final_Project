@@ -93,11 +93,26 @@ references:
   title: World Happiness Report
 ---
 
+<!-- Notes
+  * Briefly explain that dataset considered here is the one created for MAT 8790
+  * Explain data sources
+  * Perform exploratory data analysis (univariate visualizations, summary tables, correlation matrix)
+  * Conduct several analyses comparing parametric and nonparametric methods
+     * Be sure to state hypotheses and assumptions for each
+  * Comment on the appropriateness of nonparametric methods
+  * Discuss limitations
+  
+  * ASK DR. FREY HOW MUCH CODE HE WANTS SHOWN IN THE REPORT
+-->
+
+## **Abstract**
+
+
 ## **Background**
 
 As globalism increases across the world, a natural topic of interest is how the world's nations compare with respect to quality of life (QoL).  Several organizations monitor global QoL indicators and report single-dimension or aggregate values for indicators of interest.  For example, the World Bank reports Gross Domestic Product (GDP), which is a single-dimension indicator often strongly predictive of QoL in a given country (@worldbank_gdp).  Additionally, the World Health Organization reports infant mortality rate, life expectancy at birth, and life expectancy at 60 years of age (@who_infantmort, @who_life).
 
-Other quality of life measures represent compound scores or indices based on several inputs.  For example, the United Nations calculates an annual Human Development Index (HDI), representing the developmental level of each country on a scale of zero to one based on several factors, including life expectancy at birth, years of schooling, and per-capita income (@un_dvlpt_HDIdesc).  The HDI also categorizes countries into four levels of development (low, medium, high, and very high).  Similarly, the Social Progress Imperative publishes the Social Progress Index (SPI), ranging from 0 to 100, comprising over 50 dimensions in three broad categories:  basic human needs (e.g., nutrition, safety), foundations of wellbeing (e.g., basic knowledge, environmental quality), and opportunity (e.g., personal rights, freedoms) (@socialprog_desc).  The World Economic Forum's Global Gender Gap Index reports a gender equality index, scaled from 0-1, based on measurements of gender-related gaps in such dimensions as economic participation, level of education, health and survival, and political offices held (@wef_gender_desc).  Finally, the World Happiness Report calculates a score from 0-10 by considering several aspects, including per-capita GDP, healthy life expectancy, social support, freedoms, and perception of corruption, among others (@whr).
+Other quality of life measures represent compound scores or indices based on several inputs.  For example, the United Nations calculates an annual Human Development Index (HDI), representing the developmental level of each country on a scale of zero to one based on several factors, including life expectancy at birth, years of schooling, and per-capita income (@un_dvlpt_HDIdesc).  The HDI also categorizes countries into four levels of development (low, medium, high, and very high).  Similarly, the Social Progress Imperative publishes the Social Progress Index (SPI), ranging from 0 to 100, and comprising over 50 dimensions in three broad categories:  basic human needs (e.g., nutrition, safety), foundations of wellbeing (e.g., basic knowledge, environmental quality), and opportunity (e.g., personal rights, freedoms) (@socialprog_desc).  The World Economic Forum's Global Gender Gap Index reports a gender equality index, scaled from 0-1, based on measurements of gender-related gaps in such dimensions as economic participation, level of education, health and survival, and political offices held (@wef_gender_desc).  Finally, the World Happiness Report calculates a score from 0-10 by considering per-capita GDP, healthy life expectancy, social support, freedoms, and perception of corruption, among others (@whr).
 
 The objective of this analysis is to explore the distributions of and relationships between key QoL indicators using both nonparametric and parametric methods, and to assess the appropriateness of each method used.
 
@@ -121,18 +136,10 @@ A country-level dataset titled `alldata` containing the following variables, all
 
 Missing values were omitted from the dataset to ensure that the tests of interest could be performed.
 
-<!-- Notes
-  * Briefly explain that dataset considered here is the one created for MAT 8790
-  * Explain data sources
-  * Perform exploratory data analysis (univariate visualizations, summary tables, correlation matrix)
-  * Conduct several analyses comparing parametric and nonparametric methods
-     * Be sure to state hypotheses and assumptions for each
-  * Comment on the appropriateness of nonparametric methods
-  * Discuss limitations
--->
+For each variable save `country`, descriptive statistics were run and a sensible visualization was generated, following which a correlation matrix was produced to examine pairwise relationships between continuous variables.  Based on these data explorations, several formal hypotheses were generated about the data, and sensible nonparametric tests and their parametric equivalents were performed to assess these hypotheses.  Results of these parallel tests were compared in the context of the data and assumptions needed. 
 
 
-### **Loading libraries**
+<!-- ### **Loading libraries** -->
 
 ```{r setup, include = FALSE, echo = FALSE, results = 'hide', warning = FALSE, message = FALSE}
 library(tidyverse)
@@ -149,9 +156,9 @@ ggthemr("fresh")
 ```
 
 
-### **Importing data**
+<!-- ### **Importing data** -->
 
-```{r import_data, include = FALSE, echo = false, message = FALSE, warning = FALSE}
+```{r import_data, include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
 alldata <- read_csv("data/MAT_8790_alldata_2018-12-02.csv")
 alldata <- alldata %>% 
   na.omit() %>% 
@@ -162,10 +169,9 @@ glimpse(alldata)
 len <- dim(alldata)[[1]]
 ```
 
+## **Results**
 
-### *Visualizations*
-
-Univariate and sensible bivariate analyses were generated to explore the data.
+### *Descriptive Statistics and Visualizations*
 
 First, exploring the Human Development Index variables:
 
@@ -187,7 +193,7 @@ HDIcat_bar <- ggplot(data = alldata, aes(x = HDI_cat)) +
 grid.arrange(HDIindex_hist, HDIcat_bar, nrow = 1)
 ```
 
-```{r HDIsumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+```{r HDIsumm, echo = FALSE, warning = FALSE, message = FALSE}
 HDIsumm <- broom::tidy(round(summary(alldata$HDIindex), digits = 4))
 sd <- round(sd(alldata$HDIindex), digits = 4)
 HDIsumm <- cbind(HDIsumm, sd) %>% 
@@ -197,7 +203,7 @@ HDIsumm
 
 Exploring the Social Progress Index data:
 
-```{r SPIplot, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE}
+```{r SPIplot, echo = FALSE, warning = FALSE, message = FALSE}
 SPI_hist <- ggplot(data = alldata, aes(x = SPI)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$SPI))))) +
   xlab("Social Progress Index") +
@@ -206,7 +212,7 @@ SPI_hist <- ggplot(data = alldata, aes(x = SPI)) +
 SPI_hist
 ```
 
-```{r SPIsumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+```{r SPIsumm, echo = FALSE, warning = FALSE, message = FALSE}
 SPIsumm <- broom::tidy(round(summary(alldata$SPI), digits = 4))
 sd <- round(sd(alldata$SPI), digits = 4)
 SPIsumm <- cbind(SPIsumm, sd) %>% 
@@ -216,7 +222,7 @@ SPIsumm
 
 Next, exploring GDP by summary statistics:
 
-```{r GDPsumm, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE}
+```{r GDPsumm, echo = FALSE, warning = FALSE, message = FALSE}
 GDPsumm <- broom::tidy(round(summary(alldata$GDP_USD_2018 / 1000000), digits = 4))
 sd <- round(sd(alldata$GDP_USD_2018 / 1000000), digits = 4)
 GDPsumm <- cbind(GDPsumm, sd) %>% 
@@ -236,7 +242,7 @@ GDP_hist <- ggplot(data = alldata, aes(x = log(GDP_USD_2018))) +
 GDP_hist
 ```
 
-```{r logGDPsumm, include = TRUE, echo = TRUE, warning = FALSE, message = FALSE}
+```{r logGDPsumm, echo = FALSE, warning = FALSE, message = FALSE}
 logGDPsumm <- broom::tidy(round(summary(alldata$logGDP), digits = 4))
 sd <- round(sd(alldata$logGDP), digits = 4)
 logGDPsumm <- cbind(logGDPsumm, sd) %>% 
@@ -255,7 +261,7 @@ happiness_hist <- ggplot(data = alldata, aes(happiness)) +
 happiness_hist
 ```
 
-```{r happinesssumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+```{r happinesssumm, echo = FALSE, warning = FALSE, message = FALSE}
 happinesssumm <- broom::tidy(round(summary(alldata$happiness), digits = 4))
 sd <- round(sd(alldata$happiness), digits = 4)
 happinesssumm <- cbind(happinesssumm, sd) %>% 
@@ -274,7 +280,7 @@ gender_hist <- ggplot(data = alldata, aes(x = genderequality_index)) +
 gender_hist
 ```
 
-```{r gendersumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+```{r gendersumm, echo = FALSE, warning = FALSE, message = FALSE}
 gendersumm <- broom::tidy(round(summary(alldata$genderequality_index), digits = 4))
 sd <- round(sd(alldata$genderequality_index), digits = 4)
 gendersumm <- cbind(gendersumm, sd) %>% 
@@ -293,7 +299,7 @@ infantmort_hist <- ggplot(data = alldata, aes(x = infantmort)) +
 infantmort_hist
 ```
 
-```{r infantmortsumm, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+```{r infantmortsumm, echo = FALSE, warning = FALSE, message = FALSE}
 infantmortsumm <- broom::tidy(round(summary(alldata$infantmort), digits = 4))
 sd <- round(sd(alldata$infantmort), digits = 4)
 infantmortsumm <- cbind(infantmortsumm, sd) %>% 
@@ -328,7 +334,7 @@ grid.arrange(lifeexp_birth_box, lifeexp_sixty_box, nrow = 1,
                             gp = gpar(fontsize = 16, fontface = "bold", col = "#545454")))
 ```
 
-```{r lifeexp_summ, include = false, echo = TRUE, warning = FALSE, message = FALSE}
+```{r lifeexp_summ, echo = FALSE, warning = FALSE, message = FALSE}
 # Total Life Expectancy at Birth
 
 birth_MFsumm <- broom::tidy(round(summary(alldata$birth_MF), digits = 4))
@@ -346,11 +352,9 @@ sixty_MFsumm <- cbind(sixty_MFsumm, sd) %>%
 sixty_MFsumm
 ```
 
-<!-- Reevaluate whether the corrplot is needed here -->
-
 Investigating pairwise relationships between continuous variables:
 
-```{r calc_corrplot, include = TRUE, echo = TRUE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 8}
+```{r calc_corrplot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 8}
 alldata <- alldata %>% mutate(logGDP = log(GDP_USD_2018))
 
 corrplot <- ggpairs(data = alldata, columns = c(5, 15, 8, 10:14),
@@ -365,3 +369,7 @@ Strong positive linear relationships are seen between `HDIindex` and `SPI`, `hap
 Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  A strong negative nonlinear relationship is seen between `infantmort` and `sixty_MF`.
 
 
+### *Hypothesis \#1:  *
+
+
+## **References**
