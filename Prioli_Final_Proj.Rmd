@@ -1,13 +1,13 @@
 ---
 title: "Comparing Quality of Life by Human Development Category:  Parametric vs. Nonparametric Approaches"
 author: "Katherine M. Prioli"
-date: "December 16, 2018"
+date: "December 20, 2018"
 output:
   pdf_document: default
   html_document: default
 geometry: margin = 0.5in
 references:
-- URL: https://github.com/kmprioliPROF/MAT_8790_Final_Project
+- URL: https://github.com/kmprioliPROF/MAT_8452_Final_Project
   author:
   - family: Prioli
     given: Katherine M.
@@ -15,7 +15,7 @@ references:
   issued:
     month: 12
     year: 2018
-  title: MAT_8790_Final_Project
+  title: MAT_8452_Final_Project
 - URL: http://apps.who.int/gho/data/view.main.SDG2016LEXv?lang=en
   author:
   - family: World Health Organization
@@ -117,18 +117,18 @@ len <- dim(alldata)[[1]]
 
 The final dataframe, titled `alldata`, contains the following:
 
-| **Source**       	              | **Variable Name**    	| **Description**                                  	|
-|-------------------------------- |----------------------	|--------------------------------------------------	|
-| @socialprog      	              | SPI                  	| Social Progress Index value (scale of 0:100)     	|
-| @worldbank_gdp   	              | GDP_USD_2018         	| 2016 Gross Domestic Product (valued in $US 2018) 	|
-| @un_dvlpt        	              | HDIrank              	| Human Development Index ranking                  	|
-| @un_dvlpt        	              | HDIindex             	| HDI index value (scale of 0:1)                   	|
-| @un_dvlpt        	              | HDI_cat              	| HDI index category (5 levels)                    	|
-| @whr             	              | happiness            	| World Happiness Score (scale of 0:10)            	|
-| @wef_gender      	              | genderequality_index 	| Gender Equality Index (scale of 0:1)             	|
-| @who_infantmort  	              | infantmort           	| Infant mortality rate                            	|
-| @who_life        	              | birth_MF             	| Life expectancy at birth, males & females        	|
-| @who_life        	              | sixty_MF             	| Life expectancy at 60 years, males & females     	|
+| **Source**       	              | **Variable Name**    	  | **Description**                                  	|
+|-------------------------------- |------------------------	|--------------------------------------------------	|
+| @socialprog      	              | `SPI`                  	| Social Progress Index value (scale of 0:100)     	|
+| @worldbank_gdp   	              | `GDP_USD_2018`         	| 2016 Gross Domestic Product (valued in $US 2018) 	|
+| @un_dvlpt        	              | `HDIrank`              	| Human Development Index ranking                  	|
+| @un_dvlpt        	              | `HDIindex`             	| HDI index value (scale of 0:1)                   	|
+| @un_dvlpt        	              | `HDI_cat`              	| HDI index category (5 levels)                    	|
+| @whr             	              | `happiness`            	| World Happiness Score (scale of 0:10)            	|
+| @wef_gender      	              | `genderequality_index` 	| Gender Equality Index (scale of 0:1)             	|
+| @who_infantmort  	              | `infantmort`           	| Infant mortality rate                            	|
+| @who_life        	              | `birth_MF`             	| Life expectancy at birth, males & females        	|
+| @who_life        	              | `sixty_MF`             	| Life expectancy at 60 years, males & females     	|
 
 
 ### *Visualizations*
@@ -150,7 +150,7 @@ HDIcat_bar <- ggplot(data = alldata, aes(x = HDI_cat)) +
             hjust = 0.5, position = position_stack(vjust = 0.5)) +
   xlab("Human Development Category") +
   ylab("Count") +
-  ggtitle("Human Development Index Counts \nby Category")
+  ggtitle("Human Development Index \nCountry Counts by Category")
 
 grid.arrange(HDIindex_hist, HDIcat_bar, nrow = 1)
 ```
