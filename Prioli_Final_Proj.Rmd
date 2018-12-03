@@ -37,6 +37,13 @@ references:
   issued:
     year: 2016
   title: Gender Equality
+- URL: http://reports.weforum.org/global-gender-gap-report-2016/measuring-the-global-gender-gap/
+  author:
+  - family: World Economic Forum
+  id: wef_gender_desc
+  issued:
+    year: 2016
+  title: Measuring the Global Gender Gap
 - URL: https://data.worldbank.org/indicator/ny.gdp.mktp.cd?view=map&year_high_desc=true 
   author:
   - family: The World Bank
@@ -51,6 +58,13 @@ references:
   issued:
     year: 2018
   title: Human Development Index
+- URL: http://hdr.undp.org/en/content/human-development-index-hdi
+  author:
+  - family:  The United Nations Development Programme
+  id: un_dvlpt_HDIdesc
+  issued:
+    year: 2018
+  title: Human Development Reports - Human Development Index (HDI)
 - URL: https://www.socialprogress.org/?tab=4
   author:
   - family: Social Progress Imperative
@@ -58,9 +72,21 @@ references:
   issued:
     year: 2018
   title: Social Progress Index
+- URL: https://www.socialprogress.org/index
+  author:
+  - family: Social Progress Imperative
+  id: socialprog_desc
+  issued:
+    year: 2018
+  title:  Social Progress Index - Overview
 - URL: http://worldhappiness.report/ed/2018/
   author:
-  - family: World Happiness Report
+  - family: Helliwell
+    given: John F.
+  - family: Layard
+    given: Richard
+  - family: Sachs
+    given: Jeffrey D.
   id: whr
   issued:
     year: 2018
@@ -69,19 +95,40 @@ references:
 
 ## **Background**
 
+As globalism increases across the world, a natural topic of interest is how the world's nations compare with respect to quality of life (QoL).  Several organizations monitor global QoL indicators and report single-dimension or aggregate values for indicators of interest.  For example, the World Bank reports Gross Domestic Product (GDP), which is a single-dimension indicator often strongly predictive of QoL in a given country (@worldbank_gdp).  Additionally, the World Health Organization reports infant mortality rate, life expectancy at birth, and life expectancy at 60 years of age (@who_infantmort, @who_life).
 
+Other quality of life measures represent compound scores or indices based on several inputs.  For example, the United Nations calculates an annual Human Development Index (HDI), representing the developmental level of each country on a scale of zero to one based on several factors, including life expectancy at birth, years of schooling, and per-capita income (@un_dvlpt_HDIdesc).  The HDI also categorizes countries into four levels of development (low, medium, high, and very high).  Similarly, the Social Progress Imperative publishes the Social Progress Index (SPI), ranging from 0 to 100, comprising over 50 dimensions in three broad categories:  basic human needs (e.g., nutrition, safety), foundations of wellbeing (e.g., basic knowledge, environmental quality), and opportunity (e.g., personal rights, freedoms) (@socialprog_desc).  The World Economic Forum's Global Gender Gap Index reports a gender equality index, scaled from 0-1, based on measurements of gender-related gaps in such dimensions as economic participation, level of education, health and survival, and political offices held (@wef_gender_desc).  Finally, the World Happiness Report calculates a score from 0-10 by considering several aspects, including per-capita GDP, healthy life expectancy, social support, freedoms, and perception of corruption, among others (@whr).
+
+The objective of this analysis is to explore the distributions of and relationships between key QoL indicators using both nonparametric and parametric methods, and to assess the appropriateness of each method used.
 
 ## **Methods**
 
+A country-level dataset titled `alldata` containing the following variables, all from 2016, was generated for the MAT 8790 course:
+
+| **Source**       	              | **Variable Name**    	  | **Description**                                  	|
+|-------------------------------- |------------------------	|--------------------------------------------------	|
+| `countrycode` package           | `country`               | Country names                                     |
+| @socialprog      	              | `SPI`                  	| Social Progress Index value (scale of 0:100)     	|
+| @worldbank_gdp   	              | `GDP_USD_2018`         	| 2016 Gross Domestic Product (valued in $US 2018) 	|
+| @un_dvlpt        	              | `HDIrank`              	| Human Development Index ranking                  	|
+| @un_dvlpt        	              | `HDIindex`             	| HDI index value (scale of 0:1)                   	|
+| @un_dvlpt        	              | `HDI_cat`              	| HDI index category (5 levels)                    	|
+| @whr             	              | `happiness`            	| World Happiness Score (scale of 0:10)            	|
+| @wef_gender      	              | `genderequality_index` 	| Gender Equality Index (scale of 0:1)             	|
+| @who_infantmort  	              | `infantmort`           	| Infant mortality rate                            	|
+| @who_life        	              | `birth_MF`             	| Life expectancy at birth, males & females        	|
+| @who_life        	              | `sixty_MF`             	| Life expectancy at 60 years, males & females     	|
+
+Missing values were omitted from the dataset to ensure that the tests of interest could be performed.
 
 <!-- Notes
   * Briefly explain that dataset considered here is the one created for MAT 8790
   * Explain data sources
   * Perform exploratory data analysis (univariate visualizations, summary tables, correlation matrix)
   * Conduct several analyses comparing parametric and nonparametric methods
-      1.  Compare results of significance testing of infant mortality rates by HDI_cat via ANOVA (parametric) and permutation F-test
-      2.  
+     * Be sure to state hypotheses and assumptions for each
   * Comment on the appropriateness of nonparametric methods
+  * Discuss limitations
 -->
 
 
@@ -104,7 +151,7 @@ ggthemr("fresh")
 
 ### **Importing data**
 
-```{r import_data, include = FALSE, echo = TRUE, message = FALSE, warning = FALSE}
+```{r import_data, include = FALSE, echo = false, message = FALSE, warning = FALSE}
 alldata <- read_csv("data/MAT_8790_alldata_2018-12-02.csv")
 alldata <- alldata %>% 
   na.omit() %>% 
@@ -114,21 +161,6 @@ glimpse(alldata)
 
 len <- dim(alldata)[[1]]
 ```
-
-The final dataframe, titled `alldata`, contains the following:
-
-| **Source**       	              | **Variable Name**    	  | **Description**                                  	|
-|-------------------------------- |------------------------	|--------------------------------------------------	|
-| @socialprog      	              | `SPI`                  	| Social Progress Index value (scale of 0:100)     	|
-| @worldbank_gdp   	              | `GDP_USD_2018`         	| 2016 Gross Domestic Product (valued in $US 2018) 	|
-| @un_dvlpt        	              | `HDIrank`              	| Human Development Index ranking                  	|
-| @un_dvlpt        	              | `HDIindex`             	| HDI index value (scale of 0:1)                   	|
-| @un_dvlpt        	              | `HDI_cat`              	| HDI index category (5 levels)                    	|
-| @whr             	              | `happiness`            	| World Happiness Score (scale of 0:10)            	|
-| @wef_gender      	              | `genderequality_index` 	| Gender Equality Index (scale of 0:1)             	|
-| @who_infantmort  	              | `infantmort`           	| Infant mortality rate                            	|
-| @who_life        	              | `birth_MF`             	| Life expectancy at birth, males & females        	|
-| @who_life        	              | `sixty_MF`             	| Life expectancy at 60 years, males & females     	|
 
 
 ### *Visualizations*
