@@ -16,6 +16,15 @@ references:
     month: 12
     year: 2018
   title: MAT_8452_Final_Project
+- URL: https://github.com/kmprioliPROF/MAT_8790_Final_Project
+  author:
+  - family: Prioli
+    given: Katherine M.
+  id: kmpgit_8790
+  issued:
+    month: 12
+    year: 2018
+  title: MAT_8790_Final_Project
 - URL: http://apps.who.int/gho/data/view.main.SDG2016LEXv?lang=en
   author:
   - family: World Health Organization
@@ -91,52 +100,18 @@ references:
   issued:
     year: 2018
   title: World Happiness Report
+abstract: "BACKGROUND Increasing globalization has generated interest in comparing countries by key quality of life (QoL) measures such as life expectancy, gender equality, and happiness, among others.  When considering how countries compare by QoL, it is vital to understand how the measures are related, if at all, and in what ways the statistical tests chosen affect the results.  METHODS A dataset containing country names and selected QoL measures for 2016 was explored through descriptive statistics and sensible univariate and bivariate visualizations.  Six sets of hypotheses pertaining to relationships within the data were generated and tested with both nonparametric methods and their parametric equivalents, and results of these paired analyses were compared.  RESULTS Text goes here CONCLUSION text goes here"
 ---
 
 <!-- Notes
-  * Briefly explain that dataset considered here is the one created for MAT 8790
   * Explain data sources
   * Perform exploratory data analysis (univariate visualizations, summary tables, correlation matrix)
   * Conduct several analyses comparing parametric and nonparametric methods
      * Be sure to state hypotheses and assumptions for each
   * Comment on the appropriateness of nonparametric methods
   * Discuss limitations
-  
-  * ASK DR. FREY HOW MUCH CODE HE WANTS SHOWN IN THE REPORT
+  * Make sure the ordering of references is appropriate for the text
 -->
-
-## **Abstract**
-
-
-## **Background**
-
-As globalism increases across the world, a natural topic of interest is how the world's nations compare with respect to quality of life (QoL).  Several organizations monitor global QoL indicators and report single-dimension or aggregate values for indicators of interest.  For example, the World Bank reports Gross Domestic Product (GDP), which is a single-dimension indicator often strongly predictive of QoL in a given country (@worldbank_gdp).  Additionally, the World Health Organization reports infant mortality rate, life expectancy at birth, and life expectancy at 60 years of age (@who_infantmort, @who_life).
-
-Other quality of life measures represent compound scores or indices based on several inputs.  For example, the United Nations calculates an annual Human Development Index (HDI), representing the developmental level of each country on a scale of zero to one based on several factors, including life expectancy at birth, years of schooling, and per-capita income (@un_dvlpt_HDIdesc).  The HDI also categorizes countries into four levels of development (low, medium, high, and very high).  Similarly, the Social Progress Imperative publishes the Social Progress Index (SPI), ranging from 0 to 100, and comprising over 50 dimensions in three broad categories:  basic human needs (e.g., nutrition, safety), foundations of wellbeing (e.g., basic knowledge, environmental quality), and opportunity (e.g., personal rights, freedoms) (@socialprog_desc).  The World Economic Forum's Global Gender Gap Index reports a gender equality index, scaled from 0-1, based on measurements of gender-related gaps in such dimensions as economic participation, level of education, health and survival, and political offices held (@wef_gender_desc).  Finally, the World Happiness Report calculates a score from 0-10 by considering per-capita GDP, healthy life expectancy, social support, freedoms, and perception of corruption, among others (@whr).
-
-The objective of this analysis is to explore the distributions of and relationships between key QoL indicators using both nonparametric and parametric methods, and to assess the appropriateness of each method used.
-
-## **Methods**
-
-A country-level dataset titled `alldata` containing the following variables, all from 2016, was generated for the MAT 8790 course:
-
-| **Source**       	              | **Variable Name**    	  | **Description**                                  	|
-|-------------------------------- |------------------------	|--------------------------------------------------	|
-| `countrycode` package           | `country`               | Country names                                     |
-| @socialprog      	              | `SPI`                  	| Social Progress Index value (scale of 0:100)     	|
-| @worldbank_gdp   	              | `GDP_USD_2018`         	| 2016 Gross Domestic Product (valued in $US 2018) 	|
-| @un_dvlpt        	              | `HDIrank`              	| Human Development Index ranking                  	|
-| @un_dvlpt        	              | `HDIindex`             	| HDI index value (scale of 0:1)                   	|
-| @un_dvlpt        	              | `HDI_cat`              	| HDI index category (5 levels)                    	|
-| @whr             	              | `happiness`            	| World Happiness Score (scale of 0:10)            	|
-| @wef_gender      	              | `genderequality_index` 	| Gender Equality Index (scale of 0:1)             	|
-| @who_infantmort  	              | `infantmort`           	| Infant mortality rate                            	|
-| @who_life        	              | `birth_MF`             	| Life expectancy at birth, males & females        	|
-| @who_life        	              | `sixty_MF`             	| Life expectancy at 60 years, males & females     	|
-
-Missing values were omitted from the dataset to ensure that the tests of interest could be performed.
-
-For each variable save `country`, descriptive statistics were run and a sensible visualization was generated, following which a correlation matrix was produced to examine pairwise relationships between continuous variables.  Based on these data explorations, several formal hypotheses were generated about the data, and sensible nonparametric tests and their parametric equivalents were performed to assess these hypotheses.  Results of these parallel tests were compared in the context of the data and assumptions needed. 
 
 
 <!-- ### **Loading libraries** -->
@@ -154,6 +129,89 @@ library(GGally)          # For ggpairs() correlation matrix
 
 ggthemr("fresh")
 ```
+
+
+## **Background**
+
+With increasing economic globalization, a natural topic of interest is how the world's nations compare with respect to quality of life (QoL).  Several organizations monitor global QoL indicators and report single-dimension or aggregate values for indicators of interest.  For example, the World Bank reports Gross Domestic Product (GDP), which is a single-dimension indicator often strongly predictive of QoL in a given country (@worldbank_gdp).  Additionally, the World Health Organization reports infant mortality rate, life expectancy at birth, and life expectancy at 60 years of age (@who_infantmort, @who_life).
+
+Other quality of life measures represent compound scores or indices based on several inputs.  For example, the United Nations calculates an annual Human Development Index (HDI), representing the developmental level of each country on a scale of zero to one based on several factors, including life expectancy at birth, years of schooling, and per-capita income (@un_dvlpt_HDIdesc).  The HDI also categorizes countries into four levels of development (low, medium, high, and very high).  Similarly, the Social Progress Imperative publishes the Social Progress Index (SPI), ranging from 0 to 100, and comprising over 50 dimensions in three broad categories:  basic human needs (e.g., nutrition, safety), foundations of wellbeing (e.g., basic knowledge, environmental quality), and opportunity (e.g., personal rights, freedoms) (@socialprog_desc).  The World Economic Forum's Global Gender Gap Index reports a gender equality index, scaled from 0-1, based on measurements of gender-related gaps in such dimensions as economic participation, level of education, health and survival, and political offices held (@wef_gender_desc).  Finally, the World Happiness Report calculates a score from 0-10 by considering per-capita GDP, healthy life expectancy, social support, freedoms, and perception of corruption, among others (@whr).
+
+The objective of this analysis is to explore the distributions of and relationships between key QoL indicators using both nonparametric and parametric methods, and to assess the appropriateness of each method used.
+
+
+## **Methods**
+
+The dataset used in this analysis, titled `alldata`, was generated for the MAT 8790 course (@kmpgit_8790).  It consists of country-level variables for calendar year 2016 as described in Table 1.
+
+**Table 1.  `alldata` dataframe contents.**
+
+| **Source**       	              | **Variable Name**    	  | **Description**                                  	|
+|-------------------------------- |------------------------	|--------------------------------------------------	|
+| `countrycode` package           | `country`               | Country names                                     |
+| @socialprog      	              | `SPI`                  	| Social Progress Index value (scale of 0:100)     	|
+| @worldbank_gdp   	              | `GDP_USD_2018`         	| 2016 Gross Domestic Product (valued in $US 2018) 	|
+| @un_dvlpt        	              | `HDIrank`              	| Human Development Index ranking                  	|
+| @un_dvlpt        	              | `HDIindex`             	| HDI index value (scale of 0:1)                   	|
+| @un_dvlpt        	              | `HDI_cat`              	| HDI index category (5 levels)                    	|
+| @whr             	              | `happiness`            	| World Happiness Score (scale of 0:10)            	|
+| @wef_gender      	              | `genderequality_index` 	| Gender Equality Index (scale of 0:1)             	|
+| @who_infantmort  	              | `infantmort`           	| Infant mortality rate                            	|
+| @who_life        	              | `birth_MF`             	| Life expectancy at birth, males & females        	|
+| @who_life        	              | `sixty_MF`             	| Life expectancy at 60 years, males & females     	|
+
+All variables pertain to the calendar year 2016.  Missing values were omitted from the dataset to ensure that the tests of interest could be performed.
+
+For each variable except `country`, descriptive statistics were run and a sensible visualization was generated, following which a correlation matrix was produced to examine pairwise relationships between continuous variables.
+
+Based on the data exploration results, several formal hypotheses were generated about the data, and sensible nonparametric tests and their parametric equivalents were performed to assess these hypotheses.  Results of these parallel tests were compared in the context of the data and assumptions needed. 
+
+### *Hypotheses*
+
+Data exploration led to six hypotheses, as presented in Table 2.
+
+**Table 2.  Hypotheses of Interest**
+
+```{r generate_table2, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+tbl2_test <- c(1:6)
+tbl2_null <- c("The sample median is equal to its mean",
+               "Social progress and human development are not associated",
+               "There is no relationship between log(GDP) and infant mortality",
+               "Happiness is normally distributed",
+               "Gender equality and adjusted social progress index have the same spread",
+               "Infant mortality rate is the same across levels of human development")
+tbl2_alt <- c("The sample median differs from its mean",
+              "Social progress and human development are correlated",
+              "There is a relationship between log(GDP) and infant mortality",
+              "Happiness is not normally distributed",
+              "Gender equality index and adjusted social progress index differ in spread",
+              "Infant mortality rate differs by level of human development")
+tbl2_nonpara <- c("One-Sample Sign Test",
+                  "Kendall's Tau",
+                  "Hoeffding's Test",
+                  "One-Sample Kolmogorov-Smirnov Test",
+                  "Ansari-Bradley Test",
+                  "Permutation F-Test")
+tbl2_para <- c("One-Sample t-Test",
+               "Pearson's Correlation Test",
+               "Pearson's Correlation Test",
+               "Shapiro-Wilk Test",
+               "Levene's Test",
+               "ANOVA")
+tbl2 <- as.tibble(cbind(tbl2_test, tbl2_null, tbl2_alt, tbl2_nonpara, tbl2_para))
+colnames(tbl2) <- c("Test", "Null Hypothesis", "Alternative Hypothesis", "Nonparametric Test", "Parametric Test")
+tbl2_kbl <- tbl2 %>% 
+  kable(format = "latex") %>% 
+  column_spec(1, width = "3em", border_left = FALSE, border_right = FALSE) %>%
+  column_spec(2, width = "10em", border_left = FALSE, border_right = FALSE) %>% 
+  column_spec(3, width = "10em", border_left = FALSE, border_right = FALSE) %>% 
+  column_spec(4, width = "10em", border_left = FALSE, border_right = FALSE) %>% 
+  column_spec(5, width = "10em", border_left = FALSE, border_right = FALSE)
+tbl2_kbl
+```
+
+All tests were performed at level $\alpha = 0.05$ in R.  The dataset, full code, and this report are available in an online repository (@kmpgit).
+
 
 
 <!-- ### **Importing data** -->
@@ -201,9 +259,11 @@ HDIsumm <- cbind(HDIsumm, sd) %>%
 HDIsumm
 ```
 
+<div class = "twoC">
+
 Exploring the Social Progress Index data:
 
-```{r SPIplot, echo = FALSE, warning = FALSE, message = FALSE}
+```{r SPIplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
 SPI_hist <- ggplot(data = alldata, aes(x = SPI)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$SPI))))) +
   xlab("Social Progress Index") +
@@ -220,6 +280,9 @@ SPIsumm <- cbind(SPIsumm, sd) %>%
 SPIsumm
 ```
 
+</div>
+<div class="clearer"></div>
+
 Next, exploring GDP by summary statistics:
 
 ```{r GDPsumm, echo = FALSE, warning = FALSE, message = FALSE}
@@ -232,12 +295,12 @@ GDPsumm
 
 Taking the log transform and plotting:
 
-```{r GDPplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+```{r GDPplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
 GDP_hist <- ggplot(data = alldata, aes(x = log(GDP_USD_2018))) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$GDP_USD_2018))))) +
   xlab("log(GDP) ($US 2018)") +
   ylab("Count") +
-  ggtitle("Gross Domestic Product Distribution, Log Transform") +
+  ggtitle("Gross Domestic Product Distribution, \nLog Transform") +
   scale_x_continuous(labels = scales::dollar_format(prefix = "$"))
 GDP_hist
 ```
@@ -252,7 +315,7 @@ logGDPsumm
 
 Exploring the World Happiness Report data:
 
-```{r happinessplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+```{r happinessplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
 happiness_hist <- ggplot(data = alldata, aes(happiness)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$happiness))))) +
   xlab("Happiness Score") +
@@ -271,7 +334,7 @@ happinesssumm
 
 Exploring the gender equality index data:
 
-```{r genderplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+```{r genderplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
 gender_hist <- ggplot(data = alldata, aes(x = genderequality_index)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
   xlab("Gender Equality Index") +
@@ -290,7 +353,7 @@ gendersumm
 
 Exploring the WHO infant mortality rate data:
 
-```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
+```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
 infantmort_hist <- ggplot(data = alldata, aes(x = infantmort)) + 
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
   xlab("Probability of Infant Mortality") +
