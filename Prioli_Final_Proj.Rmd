@@ -268,39 +268,34 @@ HDIcat_bar <- ggplot(data = alldata, aes(x = HDI_cat)) +
   ylab("Count") +
   ggtitle("Human Development Index \nCountry Counts by Category")
 
-grid.arrange(HDIindex_hist, HDIcat_bar, nrow = 1)
-```
-
-```{r HDIsumm, echo = FALSE, warning = FALSE, message = FALSE}
 HDIsumm <- broom::tidy(round(summary(alldata$HDIindex), digits = 3))
 sd <- round(sd(alldata$HDIindex), digits = 3)
 HDIsumm <- cbind(HDIsumm, sd)
 colnames(HDIsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
-HDIsumm <- HDIsumm %>% 
-  kable(format = "markdown")
-HDIsumm
+HDIsumm_grob <- tableGrob(HDIsumm, theme = ttheme_minimal(), rows = NULL)
+
+grid.arrange(HDIindex_hist, HDIcat_bar, HDIsumm_grob, nrow = 2, heights = c(0.8, 0.2))
 ```
 
 Exploring the Social Progress Index data:
 
-```{r SPIplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
+```{r SPIplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
 SPI_hist <- ggplot(data = alldata, aes(x = SPI)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$SPI))))) +
   xlab("Social Progress Index") +
   ylab("Count") +
   ggtitle("Social Progress Index Distribution")
-SPI_hist
-```
 
-```{r SPIsumm, echo = FALSE, warning = FALSE, message = FALSE}
 SPIsumm <- broom::tidy(round(summary(alldata$SPI), digits = 3))
 sd <- round(sd(alldata$SPI), digits = 3)
 SPIsumm <- cbind(SPIsumm, sd)
 colnames(SPIsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
- SPIsumm <- SPIsumm %>% 
-   kable(format = "markdown")
-SPIsumm
+SPIsumm_grob <- tableGrob(t(SPIsumm), theme = ttheme_minimal())
+
+grid.arrange(SPI_hist, SPIsumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
+
+
 
 
 Next, exploring GDP by summary statistics:
@@ -317,87 +312,75 @@ GDPsumm
 
 Taking the log transform and plotting:
 
-```{r GDPplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
+```{r GDPplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
 GDP_hist <- ggplot(data = alldata, aes(x = log(GDP_USD_2018))) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$GDP_USD_2018))))) +
   xlab("log(GDP) ($US 2018)") +
   ylab("Count") +
   ggtitle("Gross Domestic Product Distribution, \nLog Transform") +
   scale_x_continuous(labels = scales::dollar_format(prefix = "$"))
-GDP_hist
-```
 
-```{r logGDPsumm, echo = FALSE, warning = FALSE, message = FALSE}
 logGDPsumm <- broom::tidy(round(summary(alldata$logGDP), digits = 3))
 sd <- round(sd(alldata$logGDP), digits = 3)
 logGDPsumm <- cbind(logGDPsumm, sd)
 colnames(logGDPsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
-logGDPsumm <- logGDPsumm %>% 
-  kable(format = "markdown")
-logGDPsumm
+logGDPsumm_grob <- tableGrob(t(logGDPsumm), theme = ttheme_minimal())
+
+grid.arrange(GDP_hist, logGDPsumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
 Exploring the World Happiness Report data:
 
-```{r happinessplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
+```{r happinessplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
 happiness_hist <- ggplot(data = alldata, aes(happiness)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$happiness))))) +
   xlab("Happiness Score") +
   ylab("Count") +
   ggtitle("Happiness Score Distribution")
-happiness_hist
-```
 
-```{r happinesssumm, echo = FALSE, warning = FALSE, message = FALSE}
 happinesssumm <- broom::tidy(round(summary(alldata$happiness), digits = 3))
 sd <- round(sd(alldata$happiness), digits = 3)
 happinesssumm <- cbind(happinesssumm, sd)
 colnames(happinesssumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
-happinesssumm <- happinesssumm %>% 
-  kable(format = "markdown")
-happinesssumm
+happinesssumm_grob <- tableGrob(t(happinesssumm), theme = ttheme_minimal())
+
+grid.arrange(happiness_hist, happinesssumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
 Exploring the gender equality index data:
 
-```{r genderplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
+```{r genderplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
 gender_hist <- ggplot(data = alldata, aes(x = genderequality_index)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
   xlab("Gender Equality Index") +
   ylab("Count") +
   ggtitle("Gender Equality Index Distribution")
-gender_hist
-```
 
-```{r gendersumm, echo = FALSE, warning = FALSE, message = FALSE}
 gendersumm <- broom::tidy(round(summary(alldata$genderequality_index), digits = 3))
 sd <- round(sd(alldata$genderequality_index), digits = 3)
 gendersumm <- cbind(gendersumm, sd)
 colnames(gendersumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
-gendersumm <- gendersumm %>% 
-  kable(format = "markdown")
-gendersumm
+gendersumm_grob <- tableGrob(t(gendersumm), theme = ttheme_minimal())
+
+grid.arrange(gender_hist, gendersumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
 Exploring the WHO infant mortality rate data:
 
-```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 4, fig.height = 2.5}
+```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
 infantmort_hist <- ggplot(data = alldata, aes(x = infantmort)) + 
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
   xlab("Probability of Infant Mortality") +
   ylab("Count") +
   ggtitle("Infant Mortality Distribution")
-infantmort_hist
-```
 
-```{r infantmortsumm, echo = FALSE, warning = FALSE, message = FALSE}
 infantmortsumm <- broom::tidy(round(summary(alldata$infantmort), digits = 3))
 sd <- round(sd(alldata$infantmort), digits = 3)
 infantmortsumm <- cbind(infantmortsumm, sd)
 colnames(infantmortsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
-infantmortsumm <- infantmortsumm %>% 
-  kable(format = "markdown")
-infantmortsumm
+infantmortsumm_grob <- tableGrob(t(infantmortsumm), theme = ttheme_minimal())
+
+grid.arrange(infantmort_hist, infantmortsumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
 Exploring the WHO life expectancy data:
@@ -422,21 +405,12 @@ lifeexp_sixty_box <- ggplot(data = alldata, aes(y = 60 + sixty_MF)) +
         axis.ticks.y = element_blank(),
         axis.line.y.left = element_blank())
 
-grid.arrange(lifeexp_birth_box, lifeexp_sixty_box, nrow = 1,
-             top = textGrob("Total Life Expectancy...",
-                            gp = gpar(fontsize = 16, fontface = "bold", col = "#545454")))
-```
-
-```{r lifeexp_summ, echo = FALSE, warning = FALSE, message = FALSE}
-# Total Life Expectancy at Birth
 
 birth_MFsumm <- broom::tidy(round(summary(alldata$birth_MF), digits = 3))
 sd <- round(sd(alldata$birth_MF), digits = 3)
 birth_MFsumm <- cbind(birth_MFsumm, sd)
 colnames(birth_MFsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
-birth_MFsumm <- birth_MFsumm %>% 
-  kable(format = "markdown")
-birth_MFsumm
+birth_MFsumm_grob <- tableGrob(birth_MFsumm, theme = ttheme_minimal(), rows = NULL)
 
 # Total Life Expectancy at Sixty
 
@@ -444,9 +418,14 @@ sixty_MFsumm <- broom::tidy(round(summary(alldata$sixty_MF), digits = 3))
 sd <- round(sd(alldata$sixty_MF), digits = 3)
 sixty_MFsumm <- cbind(sixty_MFsumm, sd)
 colnames(sixty_MFsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
-sixty_MFsumm <- sixty_MFsumm %>% 
-  kable(format = "markdown")
-sixty_MFsumm
+sixty_MFsumm_grob <- tableGrob(sixty_MFsumm, theme = ttheme_minimal(), rows = NULL)
+
+
+grid.arrange(lifeexp_birth_box, lifeexp_sixty_box, 
+             birth_MFsumm_grob, sixty_MFsumm_grob, 
+             nrow = 2, heights = c(0.8, 0.2),
+             top = textGrob("Total Life Expectancy...",
+                            gp = gpar(fontsize = 16, fontface = "bold", col = "#545454")))
 ```
 
 Investigating pairwise relationships between continuous variables:
