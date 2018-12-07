@@ -127,7 +127,7 @@ library(gridExtra)       # For grid.arrange()
 library(grid)            # For textGrob() to annotate grid.arrange() elements
 library(kableExtra)      # For nicer output tables
 library(GGally)          # For ggpairs() correlation matrix
-library(BDSA)            # For SIGN.test()
+library(BSDA)            # For SIGN.test()
 
 ggthemr("fresh")
 ```
@@ -468,9 +468,22 @@ Strong negative relationships are seen between `infantmort` and `birth_MF`, betw
 
 ### *Analysis #1*
 
-```{r analysis1, include = FALSE, echo = TRUE}
-analysis1_nonpara <- SIGN.test(x = alldata$HDIindex, md = mean(alldata$HDIindex), alternative = "two-sided")
+```{r analysis1, echo = TRUE}
+analysis1_nonpara <- SIGN.test(x = alldata$HDIindex, 
+                               md = mean(alldata$HDIindex), 
+                               alternative = "two.sided",
+                               conf.level = 0.95)
+analysis1_nonpara
+analysis1_para <- t.test(alldata$HDIindex,
+                         mu = median(alldata$HDIindex),
+                         alternative = "two.sided",
+                         conf.level = 0.95)
+analysis1_para
 ```
+
+The one-sample sign test for $H_{0}:  m =$ `mean(alldata$HDIindex)` versus $H_{A}:  m \ne$ `mean(alldata$HDIindex)` yielded a *p*-value of $p_{sign} =$ `r round(analysis1_nonpara$p.value, digits = 3)`.  Since $p_{sign} < \alpha$, the null hypothesis was rejected, leading to the conclusion that the median and mean HDI index values are not equal.  However, the parametric test assessed a complementary set of hypotheses $-$ that is, $H_{0}:  \mu =$ `median(alldata$HDIindex)` versus $H_{A}:  \mu \ne$ `median(alldata$HDIindex)` $-$ and resulted in $p_{t} =$ `r round(analysis1_para$p.value, digits = 3)`.  Since $p_{t} > \alpha$, the null hypothesis was retained with the conclusion that, at the $\alpha = 0.05$ level, there is insufficient evidence to assert that the mean and median are different in the parametric case.
+
+The sign test is appropriate for this data; however, due to the clear nonnormality of the `HDIindex` data, the parametric test is inappropriate because the assumption of normality is violated.  Thus the sign test results were retained.
 
 
 ### *Analysis #2*
