@@ -104,13 +104,13 @@ abstract: "BACKGROUND Increasing globalization has generated interest in compari
 ---
 
 <!-- Notes
-  * Explain data sources
   * Perform exploratory data analysis (univariate visualizations, summary tables, correlation matrix)
   * Conduct several analyses comparing parametric and nonparametric methods
-     * Be sure to state hypotheses and assumptions for each
+     * Be sure to state hypotheses AND ASSUMPTIONS for each
   * Comment on the appropriateness of nonparametric methods
   * Discuss limitations
   * Make sure the ordering of references is appropriate for the text
+  * ENSURE ALL OUTPUT IS NUMBERED
 -->
 
 
@@ -164,11 +164,10 @@ All variables pertain to the calendar year 2016.  Missing values were omitted fr
 
 For each variable except `country`, descriptive statistics were run and a sensible visualization was generated, following which a correlation matrix was produced to examine pairwise relationships between continuous variables.
 
-Based on the data exploration results, several formal hypotheses were generated about the data, and sensible nonparametric tests and their parametric equivalents were performed to assess these hypotheses.  Results of these parallel tests were compared in the context of the data and assumptions needed. 
 
 ### *Hypotheses*
 
-Data exploration led to six hypotheses, as presented in Table 2.
+Based on the data exploration results, six formal hypotheses were generated about the data (Table 2), and sensible nonparametric tests and their parametric equivalents were performed to assess these hypotheses.  Results of these parallel tests were compared in the context of the data and assumptions needed.  All tests were performed at level $\alpha = 0.05$ in R.  The dataset, full code, and this report are available in an online repository (@kmpgit).
 
 **Table 2.  Hypotheses of Interest**
 
@@ -203,16 +202,15 @@ colnames(tbl2) <- c("Test", "Null Hypothesis", "Alternative Hypothesis", "Nonpar
 tbl2_kbl <- tbl2 %>% 
   kable(format = "latex") %>% 
   column_spec(1, width = "3em", border_left = FALSE, border_right = FALSE) %>%
-  column_spec(2, width = "10em", border_left = FALSE, border_right = FALSE) %>% 
-  column_spec(3, width = "10em", border_left = FALSE, border_right = FALSE) %>% 
+  column_spec(2, width = "12em", border_left = FALSE, border_right = FALSE) %>% 
+  column_spec(3, width = "12em", border_left = FALSE, border_right = FALSE) %>% 
   column_spec(4, width = "10em", border_left = FALSE, border_right = FALSE) %>% 
   column_spec(5, width = "10em", border_left = FALSE, border_right = FALSE)
 tbl2_kbl
 ```
 
-All tests were performed at level $\alpha = 0.05$ in R.  The dataset, full code, and this report are available in an online repository (@kmpgit).
 
-
+## **Results**
 
 <!-- ### **Importing data** -->
 
@@ -227,7 +225,6 @@ glimpse(alldata)
 len <- dim(alldata)[[1]]
 ```
 
-## **Results**
 
 ### *Descriptive Statistics and Visualizations*
 
@@ -252,14 +249,14 @@ grid.arrange(HDIindex_hist, HDIcat_bar, nrow = 1)
 ```
 
 ```{r HDIsumm, echo = FALSE, warning = FALSE, message = FALSE}
-HDIsumm <- broom::tidy(round(summary(alldata$HDIindex), digits = 4))
-sd <- round(sd(alldata$HDIindex), digits = 4)
-HDIsumm <- cbind(HDIsumm, sd) %>% 
+HDIsumm <- broom::tidy(round(summary(alldata$HDIindex), digits = 3))
+sd <- round(sd(alldata$HDIindex), digits = 3)
+HDIsumm <- cbind(HDIsumm, sd)
+colnames(HDIsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+HDIsumm <- HDIsumm %>% 
   kable(format = "markdown")
 HDIsumm
 ```
-
-<div class = "twoC">
 
 Exploring the Social Progress Index data:
 
@@ -273,22 +270,24 @@ SPI_hist
 ```
 
 ```{r SPIsumm, echo = FALSE, warning = FALSE, message = FALSE}
-SPIsumm <- broom::tidy(round(summary(alldata$SPI), digits = 4))
-sd <- round(sd(alldata$SPI), digits = 4)
-SPIsumm <- cbind(SPIsumm, sd) %>% 
+SPIsumm <- broom::tidy(round(summary(alldata$SPI), digits = 3))
+sd <- round(sd(alldata$SPI), digits = 3)
+SPIsumm <- cbind(SPIsumm, sd)
+colnames(SPIsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+SPIsumm <- SPIsumm %>% 
   kable(format = "markdown")
 SPIsumm
 ```
 
-</div>
-<div class="clearer"></div>
 
 Next, exploring GDP by summary statistics:
 
 ```{r GDPsumm, echo = FALSE, warning = FALSE, message = FALSE}
-GDPsumm <- broom::tidy(round(summary(alldata$GDP_USD_2018 / 1000000), digits = 4))
-sd <- round(sd(alldata$GDP_USD_2018 / 1000000), digits = 4)
-GDPsumm <- cbind(GDPsumm, sd) %>% 
+GDPsumm <- broom::tidy(round(summary(alldata$GDP_USD_2018 / 1000000), digits = 3))
+sd <- round(sd(alldata$GDP_USD_2018 / 1000000), digits = 3)
+GDPsumm <- cbind(GDPsumm, sd)
+colnames(GDPsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+GDPsumm <- GDPsumm %>% 
   kable(format = "markdown")
 GDPsumm
 ```
@@ -306,9 +305,11 @@ GDP_hist
 ```
 
 ```{r logGDPsumm, echo = FALSE, warning = FALSE, message = FALSE}
-logGDPsumm <- broom::tidy(round(summary(alldata$logGDP), digits = 4))
-sd <- round(sd(alldata$logGDP), digits = 4)
-logGDPsumm <- cbind(logGDPsumm, sd) %>% 
+logGDPsumm <- broom::tidy(round(summary(alldata$logGDP), digits = 3))
+sd <- round(sd(alldata$logGDP), digits = 3)
+logGDPsumm <- cbind(logGDPsumm, sd)
+colnames(logGDPsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+logGDPsumm <- logGDPsumm %>% 
   kable(format = "markdown")
 logGDPsumm
 ```
@@ -325,9 +326,11 @@ happiness_hist
 ```
 
 ```{r happinesssumm, echo = FALSE, warning = FALSE, message = FALSE}
-happinesssumm <- broom::tidy(round(summary(alldata$happiness), digits = 4))
-sd <- round(sd(alldata$happiness), digits = 4)
-happinesssumm <- cbind(happinesssumm, sd) %>% 
+happinesssumm <- broom::tidy(round(summary(alldata$happiness), digits = 3))
+sd <- round(sd(alldata$happiness), digits = 3)
+happinesssumm <- cbind(happinesssumm, sd)
+colnames(happinesssumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+happinesssumm <- happinesssumm %>% 
   kable(format = "markdown")
 happinesssumm
 ```
@@ -344,9 +347,11 @@ gender_hist
 ```
 
 ```{r gendersumm, echo = FALSE, warning = FALSE, message = FALSE}
-gendersumm <- broom::tidy(round(summary(alldata$genderequality_index), digits = 4))
-sd <- round(sd(alldata$genderequality_index), digits = 4)
-gendersumm <- cbind(gendersumm, sd) %>% 
+gendersumm <- broom::tidy(round(summary(alldata$genderequality_index), digits = 3))
+sd <- round(sd(alldata$genderequality_index), digits = 3)
+gendersumm <- cbind(gendersumm, sd)
+colnames(gendersumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+gendersumm <- gendersumm %>% 
   kable(format = "markdown")
 gendersumm
 ```
@@ -363,9 +368,11 @@ infantmort_hist
 ```
 
 ```{r infantmortsumm, echo = FALSE, warning = FALSE, message = FALSE}
-infantmortsumm <- broom::tidy(round(summary(alldata$infantmort), digits = 4))
-sd <- round(sd(alldata$infantmort), digits = 4)
-infantmortsumm <- cbind(infantmortsumm, sd) %>% 
+infantmortsumm <- broom::tidy(round(summary(alldata$infantmort), digits = 3))
+sd <- round(sd(alldata$infantmort), digits = 3)
+infantmortsumm <- cbind(infantmortsumm, sd)
+colnames(infantmortsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+infantmortsumm <- infantmortsumm %>% 
   kable(format = "markdown")
 infantmortsumm
 ```
@@ -400,17 +407,21 @@ grid.arrange(lifeexp_birth_box, lifeexp_sixty_box, nrow = 1,
 ```{r lifeexp_summ, echo = FALSE, warning = FALSE, message = FALSE}
 # Total Life Expectancy at Birth
 
-birth_MFsumm <- broom::tidy(round(summary(alldata$birth_MF), digits = 4))
-sd <- round(sd(alldata$birth_MF), digits = 4)
-birth_MFsumm <- cbind(birth_MFsumm, sd) %>% 
+birth_MFsumm <- broom::tidy(round(summary(alldata$birth_MF), digits = 3))
+sd <- round(sd(alldata$birth_MF), digits = 3)
+birth_MFsumm <- cbind(birth_MFsumm, sd)
+colnames(birth_MFsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+birth_MFsumm <- birth_MFsumm %>% 
   kable(format = "markdown")
 birth_MFsumm
 
 # Total Life Expectancy at Sixty
 
-sixty_MFsumm <- broom::tidy(round(summary(alldata$sixty_MF), digits = 4))
-sd <- round(sd(alldata$sixty_MF), digits = 4)
-sixty_MFsumm <- cbind(sixty_MFsumm, sd) %>% 
+sixty_MFsumm <- broom::tidy(round(summary(alldata$sixty_MF), digits = 3))
+sd <- round(sd(alldata$sixty_MF), digits = 3)
+sixty_MFsumm <- cbind(sixty_MFsumm, sd)
+colnames(sixty_MFsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
+sixty_MFsumm <- sixty_MFsumm %>% 
   kable(format = "markdown")
 sixty_MFsumm
 ```
@@ -432,7 +443,7 @@ Strong positive linear relationships are seen between `HDIindex` and `SPI`, `hap
 Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  A strong negative nonlinear relationship is seen between `infantmort` and `sixty_MF`.
 
 
-### *Hypothesis \#1:  *
+### *Test \#1:  *
 
 
 ## **References**
