@@ -447,7 +447,7 @@ Strong negative relationships are seen between `infantmort` and `birth_MF`, betw
 
 ### *Analysis #1*
 
-```{r analysis1, echo = TRUE}
+```{r analysis1, include = FALSE, echo = FALSE}
 analysis1_nonpara <- SIGN.test(x = alldata$HDIindex, 
                                md = mean(alldata$HDIindex), 
                                alternative = "two.sided",
@@ -462,43 +462,43 @@ analysis1_para
 
 The one-sample sign test for $H_{0}:  m =$ `mean(alldata$HDIindex)` versus $H_{A}:  m \ne$ `mean(alldata$HDIindex)` yielded a *p*-value of $p_{sign} =$ `r round(analysis1_nonpara$p.value, digits = 3)`.  Since $p_{sign} < \alpha$, the null hypothesis was rejected, leading to the conclusion that the median and mean HDI index values are not equal.  However, the parametric test assessed a complementary set of hypotheses $-$ that is, $H_{0}:  \mu =$ `median(alldata$HDIindex)` versus $H_{A}:  \mu \ne$ `median(alldata$HDIindex)` $-$ and resulted in $p_{t} =$ `r round(analysis1_para$p.value, digits = 3)`.  Since $p_{t} > \alpha$, the null hypothesis was retained with the conclusion that, at the $\alpha = 0.05$ level, there is insufficient evidence to assert that the mean and median are different in the parametric case.
 
-The sign test is appropriate for this data; however, due to the clear nonnormality of the `HDIindex` data, the parametric test is inappropriate because the assumption of normality is violated.  Thus the sign test results were retained.
+The sign test is appropriate for this data; however, due to the clear nonnormality of the `HDIindex` data, the *t*-test is inappropriate because the assumption of normality is violated.  Thus the sign test results were retained.
 
 
 ### *Analysis #2*
 
-```{r analysis2, include = FALSE, echo = TRUE}
+```{r analysis2, include = FALSE, echo = FALSE}
 
 ```
 
 
 ### *Analysis #3*
 
-```{r analysis3, include = FALSE, echo = TRUE}
+```{r analysis3, include = FALSE, echo = FALSE}
 
 ```
 
 
 ### *Analysis #4*
 
-```{r analysis4, include = FALSE, echo = TRUE}
+```{r analysis4, include = FALSE, echo = FALSE}
 analysis4_nonpara <- ks.test(alldata$happiness, "pnorm", mean(alldata$happiness), sd(alldata$happiness))
 analysis4_para <- shapiro.test(alldata$happiness)
 ```
 
-
-
+The one-sample Kolmogorov-Smirnov test for $H_{0}:$ `happiness` is normally distributed vs. for $H_{A}:$ `happiness` is not normally distributed yielded p-value $p_{KS} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.
 
 ### *Analysis #5*
 
-```{r analysis5, include = FALSE, echo = TRUE}
+```{r analysis5, include = FALSE, echo = FALSE}
 
 ```
 
 
+
 ### *Analysis #6*
 
-```{r analysis6, include = FALSE, echo = TRUE}
+```{r analysis6, include = FALSE, echo = FALSE}
 
 ```
 
