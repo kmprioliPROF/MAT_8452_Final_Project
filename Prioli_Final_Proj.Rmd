@@ -25,13 +25,6 @@ references:
     month: 12
     year: 2018
   title: MAT_8790_Final_Project
-- URL: http://apps.who.int/gho/data/view.main.SDG2016LEXv?lang=en
-  author:
-  - family: World Health Organization
-  id: who_life
-  issued:
-    year: 2018
-  title: Life Expectancy
 - URL: http://apps.who.int/gho/data/view.main.182?lang=en
   author:
   - family: World Health Organization
@@ -39,6 +32,13 @@ references:
   issued:
     year: 2018
   title: Probability of Dying per 1000 Live Births
+- URL: http://apps.who.int/gho/data/view.main.SDG2016LEXv?lang=en
+  author:
+  - family: World Health Organization
+  id: who_life
+  issued:
+    year: 2018
+  title: Life Expectancy
 - URL: http://reports.weforum.org/global-gender-gap-report-2016/rankings/
   author:
   - family: World Economic Forum
@@ -167,11 +167,11 @@ All variables pertain to the calendar year 2016.  Missing values were omitted fr
 For each variable except `country`, descriptive statistics were run and a sensible visualization was generated, following which a correlation matrix was produced to examine pairwise relationships between continuous variables.
 
 
-### *Hypotheses*
+### *Analyses*
 
-Based on the data exploration results, six formal hypotheses were generated about the data (Table 2), and sensible nonparametric tests and their parametric equivalents were chosen to assess these hypotheses.
+Based on the data exploration results, six sets of formal hypotheses were generated about the data (Table 2), and sensible nonparametric tests and their parametric equivalents were chosen to test these hypotheses.
 
-**Table 2.  Hypotheses of Interest**
+**Table 2.  Analyses Performed**
 
 ```{r generate_table2, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
 tbl2_test <- c(1:6)
@@ -525,6 +525,9 @@ analysis4_para <- shapiro.test(alldata$happiness)
 
 
 ## **Discussion**
+
+
+### *Limitations*
 
 
 ## **Conclusion**
