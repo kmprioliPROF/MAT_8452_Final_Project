@@ -220,7 +220,7 @@ tbl2_kbl
 
 A two-sided one-sample test was chosen for Analysis #1 because the `HDIindex` distribution is very non-normal, yet its median and mean appear quite similar and the standard deviation is small.  The one-sample sign test assumes that the sample is random with independent draws, and the data are continuous.  Its parametric equivalent, the one-sample *t*-test, shares these assumptions and also requires normality of the sampling distribution.
 
-Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindx`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.
+Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindx`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.  Additionally, simulation is the preferred method when ties are present for Kendall's Tau, the variables were first assessed for ties before selecting a method for Kendall's Tau.
 
 Correlation tests were chosen for Analysis #3 to determine whether increasing GDP is correlated with decreasing infant mortality.  Hoeffding's Test was selected because it is sensitive to any departure from independence.  Because the relationship appears to be roughly nonlinear, Pearson's test was chosen as the parametric comparator.  Both tests employed two-sided alternatives and assume continuous data, and Pearson's test additionally assumes a linear relationship.
 
@@ -469,7 +469,33 @@ The sign test is appropriate for this data; however, due to the clear nonnormali
 
 ```{r analysis2, include = FALSE, echo = FALSE}
 
+# Assessing presence of ties (would require simulation for Kendall's Test)
+
+SPI_ties <- alldata %>% 
+  group_by(SPI) %>% 
+  mutate(count = n()) %>% 
+  ungroup() %>% 
+  select(count) %>% 
+  filter(count > 1)
+dim(SPI_ties)          # No ties
+
+HDIindex_ties <- alldata %>% 
+  group_by(HDIindex) %>% 
+  mutate(count = n()) %>% 
+  ungroup() %>% 
+  select(count) %>% 
+  filter(count > 1)
+dim(HDIindex_ties)     # No ties
+
+analysis2_nonpara <- cor.test(alldata$SPI, alldata$HDIindex, method = "kendall")
+analysis2_nonpara
+analysis2_para <- cor.test(alldata$SPI, alldata$HDIindex, method = "pearson")
+analysis2_para
 ```
+
+Ties were not present in either `SPI` or `HDIindex`; thus, Kendall's Tau was tested using the usual `cor.test(x, y, method = "kendall")` approach.  When testing for independence in both the nonparametric and parametrics cases, the *p*-value is less than 0.0001, with correlation coefficients $r_{\tau}$ = `r round(analysis2_nonpara$estimate, digits = 3)[[1]]` and *r* = `r round(analysis2_para$estimate, digits = 3)[[1]]` respectively.  Both are statistically significant and represent strong evidence of a linear relationship between social progress and human developmental level, thus $H_{0}$ was rejected with the conclusion that, at the $\alpha = 0.05$ level, social progress and human development are correlated.
+
+Both tests assume continuous data, which is satisfied, and both yield the same *p*-value.  The nonparametric method is more conservative, with a slightly smaller correlation coefficient for Kendall's Tau as compared to Pearson's, so the nonparametric method results were retained.
 
 
 ### *Analysis #3*
@@ -479,14 +505,17 @@ The sign test is appropriate for this data; however, due to the clear nonnormali
 ```
 
 
+
 ### *Analysis #4*
 
 ```{r analysis4, include = FALSE, echo = FALSE}
 analysis4_nonpara <- ks.test(alldata$happiness, "pnorm", mean(alldata$happiness), sd(alldata$happiness))
+analysis4_nonpara
 analysis4_para <- shapiro.test(alldata$happiness)
+analysis4_para
 ```
 
-The one-sample Kolmogorov-Smirnov test for $H_{0}:$ `happiness` is normally distributed vs. for $H_{A}:$ `happiness` is not normally distributed yielded p-value $p_{KS} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.
+The one-sample Kolmogorov-Smirnov test for $H_{0}:$ `happiness` is normally distributed vs. for $H_{A}:$ `happiness` is not normally distributed yielded p-value $p_{KS} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, though neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{KS}$.
 
 ### *Analysis #5*
 
