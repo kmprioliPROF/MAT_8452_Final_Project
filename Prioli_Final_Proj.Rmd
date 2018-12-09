@@ -100,7 +100,7 @@ references:
     month: 12
     year: 2018
   title: MAT_8452_Final_Project
-abstract: "BACKGROUND Increasing globalization has generated interest in comparing countries by key quality of life (QoL) measures such as life expectancy, gender equality, and happiness, among others.  When considering how countries compare by QoL, it is vital to understand how the measures are related, if at all, and in what ways the statistical tests chosen affect the results.  METHODS A dataset containing country names and selected QoL measures for 2016 was explored through descriptive statistics and sensible univariate and bivariate visualizations.  Five sets of hypotheses pertaining to relationships within the data were generated and tested with both nonparametric methods and their parametric equivalents, and results of these parallel analyses were compared.  RESULTS Nonparametric methods dominated, performing acceptably for all five cases, whereas parametric methods were acceptable in only two of the five cases.  CONCLUSION Nonparametric methods represent a powerful, important toolset for use in analyzing data that fails the assumptions needed for traditional parametric methods."
+abstract: "BACKGROUND Increasing globalization has generated interest in comparing countries by key quality of life (QoL) measures such as life expectancy, gender equality, and happiness, among others.  When considering how countries compare by QoL, it is vital to understand how the measures are related, if at all, and in what ways the statistical tests chosen affect the results.  METHODS A dataset containing country names and selected QoL measures for 2016 was explored through descriptive statistics and sensible univariate and bivariate visualizations.  Five sets of hypotheses pertaining to relationships within the data were generated and tested with both nonparametric methods and their parametric equivalents, and results of these parallel analyses and the assumptions they require were compared.  RESULTS Most variables in the study were not normally distributed.  Nonparametric methods dominated, performing acceptably for all five cases, whereas parametric methods were acceptable in only two of the five cases.  CONCLUSION Nonparametric methods represent a powerful, important toolset for use in analyzing data that fails the assumptions needed for traditional parametric methods."
 ---
 
 <!-- Notes
@@ -109,7 +109,7 @@ abstract: "BACKGROUND Increasing globalization has generated interest in compari
   * Discussion:  flesh out more; add Strengths?
   * Add to Results:
     * Compute confidence intervals for Analysis 1 and compare
-    * Plot `happiness` overlaid with pnorm curve and/or a 95% confidence band
+    * Try to get 95% confidence band working for Analysis 4
 -->
 
 
@@ -139,7 +139,7 @@ With increasing economic globalization, a natural topic of interest is how the w
 
 Other quality of life measures represent compound scores or indices based on several inputs.  For example, the United Nations calculates an annual Human Development Index (HDI), representing the developmental level of each country on a scale of zero to one based on several factors, including life expectancy at birth, years of schooling, and per-capita income (@un_dvlpt_HDIdesc).  The HDI also categorizes countries into four levels of development (low, medium, high, and very high).  Similarly, the Social Progress Imperative publishes the Social Progress Index (SPI), ranging from 0 to 100, and comprising over 50 dimensions in three broad categories:  basic human needs (e.g., nutrition, safety), foundations of wellbeing (e.g., basic knowledge, environmental quality), and opportunity (e.g., personal rights, freedoms) (@socialprog_desc).  The World Economic Forum's Global Gender Gap Index reports a gender equality index, scaled from 0-1, based on measurements of gender-related gaps in such dimensions as economic participation, level of education, health and survival, and political offices held (@wef_gender_desc).  Finally, the World Happiness Report calculates a score from 0-10 by considering per-capita GDP, healthy life expectancy, social support, freedoms, and perception of corruption, among others (@whr).
 
-The objective of this analysis is to explore the distributions of and relationships between key QoL indicators using both nonparametric and parametric methods, and to assess the appropriateness of each method used.
+When studying QoL by country, it is important to understand how each QoL measure is distributed and how they may be interrelated.  The objective of this analysis is to explore the distributions of and relationships between key QoL indicators using both nonparametric and parametric methods, and to assess the appropriateness of each method used.
 
 
 ## **Methods**
@@ -517,6 +517,38 @@ analysis4_para
 
 In Analysis 4, the one-sample Kolmogorov-Smirnov test yielded p-value $p_{KS} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{KS}$.
 
+```{r analysis4_plot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
+# hap_mean <- round(mean(alldata$happiness), digits = 3)
+# hap_sd <- round(sd(alldata$happiness), digits = 3)
+# 
+# hap_mean_CI_low <- t.test(alldata$happiness, mu = mean(alldata$happiness))$conf.int[1]
+# hap_mean_CI_high <- t.test(alldata$happiness, mu = mean(alldata$happiness))$conf.int[2]
+
+tval <- 1.96
+
+alldata <- alldata %>% 
+  mutate(hap_CI_low = happiness - tval * sd(happiness) / sqrt(len)) %>% 
+  mutate(hap_CI_high = happiness + tval * sd(happiness) / sqrt(len))
+
+analysis4_plot <- ggplot(data = alldata, aes(x = happiness)) +
+  geom_histogram(aes(y = ..density..),
+                 bins = ceiling(sqrt(len - sum(is.na(alldata$happiness))))) +
+  stat_function(fun = dnorm, args = list(mean = mean(alldata$happiness), 
+                                         sd = sd(alldata$happiness)),
+                color = "#233B43", size = 1) +
+  #geom_smooth(data = alldata, aes(y = ..density.., ymin = hap_CI_low, ymax = hap_CI_high)) +
+  # stat_function(fun = dnorm, args = list(mean = mean(alldata$hap_CI_low),
+  #                                        sd = sd(alldata$hap_CI_low)),
+  #               color = "green", size = 1) +
+  # stat_function(fun = dnorm, args = list(mean = mean(alldata$hap_CI_high),
+  #                                        sd = sd(alldata$hap_CI_high)),
+  #               color = "red", size = 1) +
+  xlab("Happiness Score") +
+  ylab("Density") +
+  ggtitle(paste0("Figure 9.  Happiness Score with N(\u03bc=" , hap_mean, ", \u03c3\u00b2=", hap_sd, ")"))
+analysis4_plot
+```
+
 
 <!-- ### *Analysis #5* -->
 
@@ -529,14 +561,14 @@ analysis5_para <- aov(as.numeric(HDI_cat) ~ infantmort, data = alldata)
 summary(analysis5_para)
 ```
 
-Both the permutation F-test and ANOVA yielded $p < 0.0001$ for Analysis 5.  Since $p < \alpha$, $H_{0}$ was rejected for both the nonparametric and parametric cases, leading to the conclusion that there exists a difference in infant mortality by HDI category.  The assumption of independence is satisfied by the data.  However, per Fig. 9, the ANOVA assumption of constant variance is violated, and additionally, normality may be violated for the Medium and High categories.  Therefore, the parametric method is inappropriate in this case, and the nonparametric method is retained.
+Both the permutation F-test and ANOVA yielded $p < 0.0001$ for Analysis 5.  Since $p < \alpha$, $H_{0}$ was rejected for both the nonparametric and parametric cases, leading to the conclusion that there exists a difference in infant mortality by HDI category.  The assumption of independence is satisfied by the data.  However, per Fig. 10, the ANOVA assumption of constant variance is violated, and additionally, normality may be violated for the Medium and High categories.  Therefore, the parametric method is inappropriate in this case, and the nonparametric method is retained.
 
 ```{r analysis5_plot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 analysis5_plot <- ggplot(data = alldata, aes(x = HDI_cat, y = infantmort)) +
   geom_boxplot() +
   xlab("HDI Category") +
   ylab("Infant Mortality Rate") +
-  ggtitle("Figure 9.  Infant Mortality Rate by HDI Category")
+  ggtitle("Figure 10.  Infant Mortality Rate by HDI Category")
 analysis5_plot
 ```
 
