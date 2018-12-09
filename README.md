@@ -7,7 +7,7 @@ output: html_document
 
 ## **Purpose**
 
-This repo contains the data, full source code, final report, and slides for my MAT 8452 final project.  The objective of this project is to compare nonparametric methods to their parametric equivalents for quality of life characteristics across countries.
+This repo contains the data, full source code, final report, and slides for my MAT 8452 final project.  The objective of this project is to compare nonparametric methods to their parametric equivalents for key quality of life characteristics across countries.
 
 
 ## **Contents**
@@ -17,7 +17,7 @@ The repo is organized as follows:
 | **Content**                             	| **Description**                                                    	|
 |-----------------------------------------	|--------------------------------------------------------------------	|
 | MAT_8790_alldata_2018-12-02.csv           | Contains source dataset (file generated for MAT 8790 final project) |
-| Final_Project.RProj                       | .RProj project container                                            |
+| Final_Project.Rproj                       | .Rproj project container                                            |
 | Prioli_Final_Proj.Rmd                     | Notebook containing source code and report                          |
 | Prioli_Final_Proj.pdf                     | Knitted notebook                                                    |
 | Prioli_Final_Proj.pptx                    | (COMING SOON) Presentation slides                                   |
