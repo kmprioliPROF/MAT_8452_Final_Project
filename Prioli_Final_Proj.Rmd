@@ -174,37 +174,32 @@ Based on the data exploration results, five sets of formal hypotheses were gener
 **Table 2.  Analyses Performed**
 
 ```{r generate_table2, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-tbl2_test <- c(1:5) #c(1:5)
+tbl2_test <- c(1:5)
 tbl2_vars <- c("HDIindex",
                "HDIindex, SPI",
                "logGDP, infantmort",
                "happiness",
-               "HDI_cat, infantmort") #,
-               #"genderequality _index, SPI")
+               "HDI_cat, infantmort")
 tbl2_null <- c("The sample median is equal to its mean",
                "Human development and social progress are not associated",
                "There is no relationship between log(GDP) and infant mortality",
                "Happiness is normally distributed",
-               "Infant mortality rate is the same across levels of human development") #,
-               #"Gender equality and adjusted social progress index have the same median")
+               "Infant mortality rate is the same across levels of human development")
 tbl2_alt <- c("The sample median differs from its mean",
               "Human development and social progress are correlated",
               "There is a relationship between log(GDP) and infant mortality",
               "Happiness is not normally distributed",
-              "Infant mortality rate differs by level of human development") #,
-              #"Gender equality index and adjusted social progress index differ in median")
+              "Infant mortality rate differs by level of human development")
 tbl2_nonpara <- c("One-Sample Sign Test",
                   "Kendall's Tau",
                   "Hoeffding's Test",
                   "One-Sample Kolmogorov-Smirnov Test",
-                  "Permutation F-Test") #,
-                  #"Wilcoxon Rank-Sum Test")
+                  "Permutation F-Test")
 tbl2_para <- c("One-Sample t-Test",
                "Pearson's Correlation Test",
                "Pearson's Correlation Test",
                "Shapiro-Wilk Test",
-               "ANOVA") #,
-               #"Two-Sample t-Test")
+               "ANOVA")
 tbl2 <- as.tibble(cbind(tbl2_test, tbl2_vars, tbl2_null, tbl2_alt, tbl2_nonpara, tbl2_para))
 colnames(tbl2) <- c("Analysis", "Variable(s)", "Null Hypothesis", "Alternative Hypothesis", "Nonparametric Test", "Parametric Test")
 tbl2_kbl <- tbl2 %>% 
@@ -226,11 +221,7 @@ Correlation tests were chosen for Analysis #3 to determine whether increasing GD
 
 Analysis #4 was chosen because `happiness` appears to have a symmetric, possibly normal distribution on univariate analysis.  Both the one-sample Kolmogorov-Smirnov test and the Shapiro-Wilk test assume a continuous sample distribution.  The formal hypotheses for this analysis were $H_{0}:$ `happiness` is normally distributed vs. for $H_{A}:$ `happiness` is not normally distributed.  Kolmogorov-Smirnov testing was performed via `ks.test()` using the arguments `"pnorm", mean(alldata$happiness), sd(alldata$happiness))` to specify the continuous comparator normal distribution having mean and standard deviation as found in `happiness`.  Shapiro-Wilk testing was carried out using `shapiro.test()`. 
 
-To test for a difference in infant mortality rate by human development category, Analysis #5 employed the permutation F-test and ANOVA as the nonparametric and parametric tests respectively.  Both tests assume samples are independent and identically distributed, and ANOVA additionally assumes a normal distribution.  The permutation F-test was performed using `jmuOutlier::perm.f.test()` using 1,000 simulations, whereas `aov()` was used for ANOVA testing.
-
-<!-- OMITTING - Analysis #6 -->
-
-<!-- Analysis #6 sought to determine whether there is a difference in median between $\frac{1}{100}$`SPI` and `genderequality_index`.  Dividing `SPI` by 100 ensures it shares the same 0:1 scale as `genderequality_index`.  After this rescaling, the two variables appear to have similar medians on descriptive analysis.  The Wilcoxon Rank-Sum test assumes all observations are independent and come from the same distribution under $H_{0}$, whereas the two-sample *t*-test assumes independent samples and normality of the sampling distribution.  A two-sided alternative was used for each test.  Wilcoxon Rank-Sum testing was carried out using the `wilcox.test()` function, and the two-sample *t*-test via `t.test()`. -->
+To test for a difference in infant mortality rate by human development category, Analysis #5 employed the permutation F-test and ANOVA as the nonparametric and parametric tests respectively.  Both tests assume samples are independent, and ANOVA additionally assumes a normal distribution with contstant variance.  The competing hypotheses were $H_{0}:$  the cumulative distribution functions (CDFs) for infant mortality were equal across all four human development levels vs. $H_{A}:$  at least one of these CDFs differs.  The permutation F-test was performed via `jmuOutlier::perm.f.test()` with 1,000 simulations because the sample size was prohibitively large for calculating an exact *p*-value.  The `aov()` function was used for ANOVA testing.
 
 Results of these five paired analyses were compared in the context of the data and assumptions needed.  All tests were performed at level $\alpha = 0.05$ in R.  The dataset, full code, and this report are available in an online repository (@kmpgit).
 
@@ -451,6 +442,7 @@ analysis1_nonpara <- SIGN.test(x = alldata$HDIindex,
                                alternative = "two.sided",
                                conf.level = 0.95)
 analysis1_nonpara
+
 analysis1_para <- t.test(alldata$HDIindex,
                          mu = median(alldata$HDIindex),
                          alternative = "two.sided",
@@ -485,6 +477,7 @@ dim(HDIindex_ties)[[1]]     # No ties
 
 analysis2_nonpara <- cor.test(alldata$SPI, alldata$HDIindex, method = "kendall")
 analysis2_nonpara
+
 analysis2_para <- cor.test(alldata$SPI, alldata$HDIindex, method = "pearson")
 analysis2_para
 ```
@@ -497,6 +490,7 @@ For Analysis 2, ties were not present in either `SPI` or `HDIindex`; thus, Kenda
 ```{r analysis3, include = FALSE, echo = FALSE}
 analysis3_nonpara <- testforDEP(alldata$logGDP, alldata$infantmort, test = "HOEFFD")
 analysis3_nonpara
+
 analysis3_para <- testforDEP(alldata$logGDP, alldata$infantmort, test = "PEARSON")
 analysis3_para
 ```
@@ -509,6 +503,7 @@ When testing for independence in Analysis 3 for both the nonparametric and param
 ```{r analysis4, include = FALSE, echo = FALSE}
 analysis4_nonpara <- ks.test(alldata$happiness, "pnorm", mean(alldata$happiness), sd(alldata$happiness))
 analysis4_nonpara
+
 analysis4_para <- shapiro.test(alldata$happiness)
 analysis4_para
 ```
@@ -527,19 +522,17 @@ analysis5_para <- aov(as.numeric(HDI_cat) ~ infantmort, data = alldata)
 summary(analysis5_para)
 ```
 
+Both the permutation F-test and ANOVA yielded $p < 0.0001$ for Analysis 5.  Since $p < \alpha$, $H_{0}$ was rejected for both the nonparametric and parametric cases, leading to the conclusion that there exists a difference in infant mortality by HDI category.  The assumption of independence is satisfied by the data.  However, per Fig. 9, the ANOVA assumption of constant variance is violated, and additionally, normality may be violated for the Medium and High categories.  Therefore, the parametric method is inappropriate in this case, and the nonparametric method is retained.
 
+```{r analysis5_plot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
+analysis5_plot <- ggplot(data = alldata, aes(x = HDI_cat, y = infantmort)) +
+  geom_boxplot() +
+  xlab("HDI Category") +
+  ylab("Infant Mortality Rate") +
+  ggtitle("Figure 9.  Infant Mortality Rate by HDI Category")
+analysis5_plot
+```
 
-
-<!-- OMITTING - ### *Analysis #6* -->
-
-<!-- ```{r analysis6, include = FALSE, echo = FALSE} -->
-<!-- analysis6_nonpara <- wilcox.test((alldata$SPI / 100), alldata$genderequality_index, -->
-<!--                                  alternative = "two.sided", exact = TRUE, -->
-<!--                                  conf.int = TRUE, conf.level = 0.95) -->
-<!-- analysis6_nonpara -->
-<!-- analysis6_para <- t.test((alldata$SPI / 100), alldata$genderequality_index) -->
-<!-- analysis6_para -->
-<!-- ``` -->
 
 
 
