@@ -107,9 +107,7 @@ abstract: "BACKGROUND Increasing globalization has generated interest in compari
   * Abstract:  flesh out Results more
   * Fix Table 2 formatting if possible
   * Discussion:  flesh out more; add Strengths?
-  * Add to Results:
-    * Compute confidence intervals for Analysis 1 and compare
-    * Try to get 95% confidence band working for Analysis 4
+  * Results:  try to get 95% confidence band working for Analysis 4
 -->
 
 
@@ -457,7 +455,7 @@ analysis1_para <- t.test(alldata$HDIindex,
 analysis1_para
 ```
 
-For Analysis 1, the one-sample sign test yielded a *p*-value of $p_{sign} =$ `r round(analysis1_nonpara$p.value, digits = 3)`.  Since $p_{sign} < \alpha$, the null hypothesis was rejected, leading to the conclusion that the median and mean HDI index values are not equal.  However, the parametric test resulted in $p_{t} =$ `r round(analysis1_para$p.value, digits = 3)`.  Since $p_{t} > \alpha$, the null hypothesis was retained with the conclusion that, at the $\alpha = 0.05$ level, there is insufficient evidence to assert that the mean and median are different in the parametric case.  The sign test is appropriate for this data; however, due to the clear nonnormality of the `HDIindex` data, the *t*-test is inappropriate because the assumption of normality is violated.  Thus the nonparametric method results were retained.
+For Analysis 1, the one-sample sign test yielded a *p*-value of $p_{sign} =$ `r round(analysis1_nonpara$p.value, digits = 3)`.  Since $p_{sign} < \alpha$, the null hypothesis was rejected, leading to the conclusion that the median and mean HDI index values are not equal.  The 95% confidence interval for the true median is (`r round(analysis1_nonpara$conf.int[1], 4)`, `r round(analysis1_nonpara$conf.int[2], 4)`), which lies above the  mean value of `r round(mean(alldata$HDIindex), 4)`.  However, the parametric test resulted in $p_{t} =$ `r round(analysis1_para$p.value, digits = 3)`.  Since $p_{t} > \alpha$, the null hypothesis was retained with the conclusion that, at the $\alpha = 0.05$ level, there is insufficient evidence to assert that the mean and median are different in the parametric case.  The corresponding 95% confidence interval is (`r round(analysis1_para$conf.int[1], 4)`, `r round(analysis1_para$conf.int[2], 4)`), which contains the median value of `r round(median(alldata$HDIindex), digits = 4)`.  The sign test is appropriate for this data; however, due to the clear nonnormality of the `HDIindex` data, the *t*-test is inappropriate because the assumption of normality is violated.  Thus the nonparametric method results were retained.
 
 
 <!-- ### *Analysis #2* -->
@@ -518,9 +516,9 @@ analysis4_para
 In Analysis 4, the one-sample Kolmogorov-Smirnov test yielded p-value $p_{KS} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{KS}$.
 
 ```{r analysis4_plot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
-# hap_mean <- round(mean(alldata$happiness), digits = 3)
-# hap_sd <- round(sd(alldata$happiness), digits = 3)
-# 
+hap_mean <- round(mean(alldata$happiness), digits = 3)
+hap_sd <- round(sd(alldata$happiness), digits = 3)
+
 # hap_mean_CI_low <- t.test(alldata$happiness, mu = mean(alldata$happiness))$conf.int[1]
 # hap_mean_CI_high <- t.test(alldata$happiness, mu = mean(alldata$happiness))$conf.int[2]
 
