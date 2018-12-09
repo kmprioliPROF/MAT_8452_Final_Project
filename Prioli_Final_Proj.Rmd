@@ -131,6 +131,7 @@ library(kableExtra)      # For nicer output tables
 library(GGally)          # For ggpairs() correlation matrix
 library(BSDA)            # For SIGN.test()
 library(testforDEP)      # For testforDEP("HOEFFD")
+library(jmuOutlier)      # For perm.f.test()
 
 ggthemr("fresh")
 ```
@@ -221,17 +222,17 @@ tbl2_kbl <- tbl2 %>%
 tbl2_kbl
 ```
 
-A two-sided one-sample test was chosen for Analysis #1 because the `HDIindex` distribution is very non-normal, yet its median and mean appear quite similar and the standard deviation is small.  The one-sample sign test assumes that the sample is random with independent draws, and the data are continuous.  Its parametric equivalent, the one-sample *t*-test, shares these assumptions and also requires normality of the sampling distribution.
+A two-sided one-sample test was chosen for Analysis #1 because the `HDIindex` distribution is very non-normal, yet its median and mean appear quite similar and the standard deviation is small.  The one-sample sign test assumes that the sample is random with independent draws, and the data are continuous.  Its parametric equivalent, the one-sample *t*-test, shares these assumptions and also requires normality of the sampling distribution.  The sign test was carried out using `BSDA::SIGN.test()` and the one-sample *t*-test via `t.test()`.
 
-Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindx`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.  Additionally, simulation is the preferred method when ties are present for Kendall's Tau, the variables were first assessed for ties before selecting a method for Kendall's Tau.
+Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindx`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.  Additionally, simulation is the preferred method when ties are present for Kendall's Tau, the variables were first assessed for ties before selecting a method for Kendall's Tau.  Both tests were carried out via `cor.test()` using `method = "kendall"` or `method = "pearson"` as appropriate.
 
 Correlation tests were chosen for Analysis #3 to determine whether increasing GDP is correlated with decreasing infant mortality.  Hoeffding's Test was selected because it is sensitive to any departure from independence.  Because the relationship appears to be roughly nonlinear, Pearson's test was chosen as the parametric comparator.  Both tests employed two-sided alternatives and assume continuous data, and Pearson's test additionally assumes a linear relationship.  These tests were carried out using `testforDEP::testforDEP()` with the options `test = "HOEFFD"` and `test = "PEARSON"` respectively.
 
-Analysis #4 was chosen because `happiness` appears to have a symmetric, possibly normal distribution on univariate analysis.  Both the one-sample Kolmogorov-Smirnov test and the Shapiro-Wilk test assume a continuous sample distribution.
+Analysis #4 was chosen because `happiness` appears to have a symmetric, possibly normal distribution on univariate analysis.  Both the one-sample Kolmogorov-Smirnov test and the Shapiro-Wilk test assume a continuous sample distribution.  Kolmogorov-Smirnov testing was performed via `ks.test()` using the arguments `"pnorm", mean(alldata$happiness), sd(alldata$happiness))` to specify the continuous comparator normal distribution having mean and standard deviation as found in `happiness`.  Shapiro-Wilk testing was carried out using `shapiro.test()`. 
 
-Analysis #5 sought to determine whether there is a difference in median between $\frac{1}{100}$`SPI` and `genderequality_index`.  Dividing `SPI` by 100 ensures it shares the same 0:1 scale as `genderequality_index`.  After this rescaling, the two variables appear to have similar medians on descriptive analysis.  The Wilcoxon Rank-Sum test assumes all observations are independent and come from the same distribution under $H_{0}$, whereas the two-sample *t*-test assumes independent samples and normality of the sampling distribution.  A two-sided alternative was used for each test.
+Analysis #5 sought to determine whether there is a difference in median between $\frac{1}{100}$`SPI` and `genderequality_index`.  Dividing `SPI` by 100 ensures it shares the same 0:1 scale as `genderequality_index`.  After this rescaling, the two variables appear to have similar medians on descriptive analysis.  The Wilcoxon Rank-Sum test assumes all observations are independent and come from the same distribution under $H_{0}$, whereas the two-sample *t*-test assumes independent samples and normality of the sampling distribution.  A two-sided alternative was used for each test.  Wilcoxon Rank-Sum testing was carried out using the `wilcox.test()` function, and the two-sample *t*-test via `t.test()`.
 
-To test for a difference in infant mortality rate by human development category, Analysis #6 employed the permutation F-test and ANOVA as the nonparametric and parametric tests respectively.  Both tests assume samples are independent and identically distributed, and ANOVA additionally assumes a normal distribution.
+To test for a difference in infant mortality rate by human development category, Analysis #6 employed the permutation F-test and ANOVA as the nonparametric and parametric tests respectively.  Both tests assume samples are independent and identically distributed, and ANOVA additionally assumes a normal distribution.  The permutation F-test was performed using `jmuOutlier::perm.f.test()` whereas `aov()` was used for ANOVA testing.
 
 Results of these six paired analyses were compared in the context of the data and assumptions needed.  All tests were performed at level $\alpha = 0.05$ in R.  The dataset, full code, and this report are available in an online repository (@kmpgit).
 
@@ -254,7 +255,7 @@ len <- dim(alldata)[[1]]
 
 ### *Descriptive Statistics and Visualizations*
 
-Descriptive statistics and univariate visualizations for the dataset are presented in Figs. 1-8.  Figure 1 depicts the distribution and descriptive statistics of the `HDIindex` variable, along with counts by country for the `HDI_cat` variable.  `HDIindex` has a very nonnormal appearance, yet has similar mean and median, and a small standard deviation as compared to the mean.  The highest category of human development is the most represented in the data.
+The analytic dataset represents 111 countries after omitting countries with missing values.  Descriptive statistics and univariate visualizations are presented in Figs. 1-8.  Figure 1 depicts the distribution and descriptive statistics of the `HDIindex` variable, along with counts by country for the `HDI_cat` variable.  `HDIindex` has a very nonnormal appearance, yet has similar mean and median, and a small standard deviation as compared to the mean.  The highest category of human development is the most represented in the data.
 
 ```{r HDIplots, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 HDIindex_hist <- ggplot(data = alldata, aes(x = HDIindex)) +
@@ -520,7 +521,9 @@ In Analysis 4, the one-sample Kolmogorov-Smirnov test for $H_{0}:$ `happiness` i
 <!-- ### *Analysis #5* -->
 
 ```{r analysis5, include = FALSE, echo = FALSE}
-
+analysis5_nonpara <- wilcox.test(alldata$genderequality_index, (alldata$SPI / 100),
+                                 alternative = "two.sided", conf.int = TRUE, conf.level = 0.95)
+analysis5_nonpara
 ```
 
 
