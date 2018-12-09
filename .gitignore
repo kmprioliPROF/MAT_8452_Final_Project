@@ -3,6 +3,5 @@
 .RData
 .Ruserdata
 OLD_generate_dataset.Rmd
-data/compdata.csv
-data/OLD/
+data/
 generate_dataset.Rmd

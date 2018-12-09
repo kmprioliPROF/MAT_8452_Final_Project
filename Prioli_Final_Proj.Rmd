@@ -231,7 +231,7 @@ Results of these five paired analyses were compared in the context of the data a
 <!-- ### **Importing data** -->
 
 ```{r import_data, include = FALSE, echo = FALSE, message = FALSE, warning = FALSE}
-alldata <- read_csv("data/MAT_8790_alldata_2018-12-02.csv")
+alldata <- read_csv("MAT_8790_alldata_2018-12-02.csv")
 alldata <- alldata %>% 
   na.omit() %>% 
   mutate(country = factor(country)) %>% 
@@ -241,7 +241,7 @@ glimpse(alldata)
 len <- dim(alldata)[[1]]
 
 
-fulldata <- read_csv("data/MAT_8790_alldata_2018-12-02.csv")
+fulldata <- read_csv("MAT_8790_alldata_2018-12-02.csv")
 fulldata <- fulldata %>% 
   mutate(country = factor(country)) %>% 
   mutate(HDI_cat = factor(HDI_cat, levels = c("Low", "Medium", "High", "Very High")))
