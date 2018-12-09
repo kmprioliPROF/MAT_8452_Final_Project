@@ -148,19 +148,19 @@ The dataset used in this analysis, titled `alldata`, was generated for the MAT 8
 
 **Table 1.  `alldata` dataframe contents.**
 
-| **Source**       	              | **Variable Name**    	  | **Description**                                  	|
-|-------------------------------- |------------------------	|--------------------------------------------------	|
-| `countrycode` package           | `country`               | Country names                                     |
-| @socialprog      	              | `SPI`                  	| Social Progress Index value (scale of 0:100)     	|
-| @worldbank_gdp   	              | `GDP_USD_2018`         	| 2016 Gross Domestic Product (valued in $US 2018) 	|
-| @un_dvlpt        	              | `HDIrank`              	| Human Development Index ranking                  	|
-| @un_dvlpt        	              | `HDIindex`             	| HDI index value (scale of 0:1)                   	|
-| @un_dvlpt        	              | `HDI_cat`              	| HDI index category (5 levels)                    	|
-| @whr             	              | `happiness`            	| World Happiness Score (scale of 0:10)            	|
-| @wef_gender      	              | `genderequality_index` 	| Gender Equality Index (scale of 0:1)             	|
-| @who_infantmort  	              | `infantmort`           	| Infant mortality rate                            	|
-| @who_life        	              | `birth_MF`             	| Life expectancy at birth, males & females        	|
-| @who_life        	              | `sixty_MF`             	| Life expectancy at 60 years, males & females     	|
+| **Source**       	              | **Variable Name**   | **Description**                                  	          |
+|-------------------------------- |-------------------- |------------------------------------------------------------	|
+| `countrycode` package           | `country`           | Country names                                               |
+| @socialprog      	              | `SPI`               | Social Progress Index value (scale of 0:100)     	          |
+| @worldbank_gdp   	              | `logGDP`            | Gross Domestic Product, log transform (valued in $US 2018) 	|
+| @un_dvlpt        	              | `HDIrank`           | Human Development Index ranking                  	          |
+| @un_dvlpt        	              | `HDIindex`          | HDI index value (scale of 0:1)                   	          |
+| @un_dvlpt        	              | `HDI_cat`           | HDI index category (5 levels)                    	          |
+| @whr             	              | `happiness`         | World Happiness Score (scale of 0:10)            	          |
+| @wef_gender      	              | `gendereq`        	| Gender Equality Index (scale of 0:1)             	          |
+| @who_infantmort  	              | `infantmort`        | Infant mortality rate                            	          |
+| @who_life        	              | `birth_MF`          | Life expectancy at birth, males & females        	          |
+| @who_life        	              | `sixty_MF`          | Life expectancy at 60 years, males & females     	          |
 
 All variables pertain to the calendar year 2016.  Missing values were omitted from the dataset to ensure that the tests of interest could be performed.
 
@@ -269,7 +269,7 @@ HDIsumm_grob <- tableGrob(HDIsumm, theme = ttheme_minimal(), rows = NULL)
 
 grid.arrange(HDIindex_hist, HDIcat_bar, HDIsumm_grob, nrow = 2, heights = c(0.8, 0.2),
              top = textGrob("Figure 1.  Human Development Index", 
-                            gp = gpar(fontsize = 16, fontface = "bold", col = "#545454"),
+                            gp = gpar(fontsize = 14, fontface = "bold", col = "#545454"),
                             x = 0.025, hjust = 0))
 ```
 
@@ -291,23 +291,11 @@ SPIsumm_grob <- tableGrob(t(SPIsumm), theme = ttheme_minimal())
 grid.arrange(SPI_hist, SPIsumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
-Summary statistics of the `GDP_USD_2018` variable (Table 3) show a wide range for this variable, with median an order of magnitude less than mean, and standard deviation an order of magnitude greater than mean.  After log transformation, the distribution appears possibly bimodal with mean and median reasonably close in value and standard deviation smaller than both.
-
-**Table 3.  GDP SUmmary Statistics**
-
-```{r GDPsumm, echo = FALSE, warning = FALSE, message = FALSE}
-GDPsumm <- broom::tidy(round(summary(alldata$GDP_USD_2018 / 1000000), digits = 3))
-sd <- round(sd(alldata$GDP_USD_2018 / 1000000), digits = 3)
-GDPsumm <- cbind(GDPsumm, sd)
-colnames(GDPsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
-GDPsumm <- GDPsumm %>% 
-  kable(format = "markdown")
-GDPsumm
-```
+The distribution of `logGDP` (Fig. 3) appears possibly bimodal with mean and median reasonably close in value and standard deviation smaller than both.
 
 ```{r GDPplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
-GDP_hist <- ggplot(data = alldata, aes(x = log(GDP_USD_2018))) +
-  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$GDP_USD_2018))))) +
+GDP_hist <- ggplot(data = alldata, aes(x = logGDP)) +
+  geom_histogram(bins = ceiling(sqrt(len))) +
   xlab("log(GDP) ($US 2018)") +
   ylab("Count") +
   ggtitle("Figure 3.  Gross Domestic Product Distribution, Log Transform") +
@@ -340,17 +328,17 @@ happinesssumm_grob <- tableGrob(t(happinesssumm), theme = ttheme_minimal())
 grid.arrange(happiness_hist, happinesssumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
-Figure 5 shows a roughly symmetric, possibly trimodal distribution for `genderequality_index`, with mean and median very close in value, and standard deviation approximately a tenth of either measure of location.
+Figure 5 shows a roughly symmetric, possibly trimodal distribution for `gendereq`, with mean and median very close in value, and standard deviation approximately a tenth of either measure of location.
 
 ```{r genderplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
-gender_hist <- ggplot(data = alldata, aes(x = genderequality_index)) +
-  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
+gender_hist <- ggplot(data = alldata, aes(x = gendereq)) +
+  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$gendereq))))) +
   xlab("Gender Equality Index") +
   ylab("Count") +
   ggtitle("Figure 5.  Gender Equality Index Distribution")
 
-gendersumm <- broom::tidy(round(summary(alldata$genderequality_index), digits = 3))
-sd <- round(sd(alldata$genderequality_index), digits = 3)
+gendersumm <- broom::tidy(round(summary(alldata$gendereq), digits = 3))
+sd <- round(sd(alldata$gendereq), digits = 3)
 gendersumm <- cbind(gendersumm, sd)
 colnames(gendersumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
 gendersumm_grob <- tableGrob(t(gendersumm), theme = ttheme_minimal())
@@ -362,7 +350,7 @@ The probability of infant mortality is heavily right-skewed per Fig. 6.
 
 ```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 infantmort_hist <- ggplot(data = alldata, aes(x = infantmort)) + 
-  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
+  geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$gendereq))))) +
   xlab("Probability of Infant Mortality") +
   ylab("Count") +
   ggtitle("Figure 6.  Infant Mortality Distribution")
@@ -416,7 +404,7 @@ grid.arrange(lifeexp_birth_box, lifeexp_sixty_box,
              birth_MFsumm_grob, sixty_MFsumm_grob, 
              nrow = 2, heights = c(0.8, 0.2),
              top = textGrob("Figure 7.  Total Life Expectancy...",
-                            gp = gpar(fontsize = 16, fontface = "bold", col = "#545454"),
+                            gp = gpar(fontsize = 14, fontface = "bold", col = "#545454"),
                             x = 0.025, hjust = 0))
 ```
 
@@ -425,9 +413,7 @@ Figure 8 depcits pairwise relationships between continuous variables.  Strong po
 Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  These indicate that increasing human development and social progress levels correlate with lower levels of infant mortality, and that as infant mortality decreases, life expectancy at birth increases.
 
 ```{r calc_corrplot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 8}
-alldata <- alldata %>% mutate(logGDP = log(GDP_USD_2018))
-
-corrplot <- ggpairs(data = alldata, columns = c(5, 15, 8, 10:14),
+corrplot <- ggpairs(data = alldata, columns = c(4, 2, 11, 6:10),
                     title = "Figure 8.  Correlation Matrix, Continuous Variables")
 corrplot
 ```
