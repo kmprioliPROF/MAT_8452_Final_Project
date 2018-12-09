@@ -100,16 +100,16 @@ references:
     month: 12
     year: 2018
   title: MAT_8452_Final_Project
-abstract: "BACKGROUND Increasing globalization has generated interest in comparing countries by key quality of life (QoL) measures such as life expectancy, gender equality, and happiness, among others.  When considering how countries compare by QoL, it is vital to understand how the measures are related, if at all, and in what ways the statistical tests chosen affect the results.  METHODS A dataset containing country names and selected QoL measures for 2016 was explored through descriptive statistics and sensible univariate and bivariate visualizations.  Six sets of hypotheses pertaining to relationships within the data were generated and tested with both nonparametric methods and their parametric equivalents, and results of these paired analyses were compared.  RESULTS Text goes here CONCLUSION text goes here"
+abstract: "BACKGROUND Increasing globalization has generated interest in comparing countries by key quality of life (QoL) measures such as life expectancy, gender equality, and happiness, among others.  When considering how countries compare by QoL, it is vital to understand how the measures are related, if at all, and in what ways the statistical tests chosen affect the results.  METHODS A dataset containing country names and selected QoL measures for 2016 was explored through descriptive statistics and sensible univariate and bivariate visualizations.  Five sets of hypotheses pertaining to relationships within the data were generated and tested with both nonparametric methods and their parametric equivalents, and results of these parallel analyses were compared.  RESULTS Nonparametric methods dominated, performing acceptably for all five cases, whereas parametric methods were acceptable in only two of the five cases.  CONCLUSION Nonparametric methods represent a powerful, important toolset for use in analyzing data that fails the assumptions needed for traditional parametric methods."
 ---
 
 <!-- Notes
-  * Comment on the appropriateness of nonparametric methods
-  * Compute confidence intervals where appropriate
-  * Discussion
-     * Note that omitting NAs may omit less developed countries (these tend to be the ones with less data availability)
-  * Discuss limitations
-  * ENSURE ALL OUTPUT IS NUMBERED
+  * Abstract:  flesh out Results more
+  * Fix Table 2 formatting if possible
+  * Discussion:  flesh out more; add Strengths?
+  * Add to Results:
+    * Compute confidence intervals for Analysis 1 and compare
+    * Plot `happiness` overlaid with pnorm curve and/or a 95% confidence band
 -->
 
 
@@ -217,7 +217,7 @@ A two-sided one-sample test was chosen for Analysis #1 because the `HDIindex` di
 
 Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindx`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.  Additionally, because simulation is the preferred method when ties are present for Kendall's Tau, the variables were first assessed for ties before selecting a method for Kendall's Tau.  The competing hypotheses for this analysis were $H_{0}: \tau = 0$ vs. $H_{A}: \tau \ne 0$ (for Kendall's Tau) and $H_{0}: \rho = 0$ vs. $H_{A}: \rho \ne 0$ (for Pearson's Test).  Both tests were carried out via `cor.test()` using `method = "kendall"` or `method = "pearson"` as appropriate.
 
-Correlation tests were chosen for Analysis #3 to determine whether increasing GDP is correlated with decreasing infant mortality.  Hoeffding's Test was selected because it is sensitive to any departure from independence.  Because the relationship appears to be roughly nonlinear, Pearson's test was chosen as the parametric comparator.  Both tests employed two-sided alternatives and assume continuous data, and Pearson's test additionally assumes a linear relationship.  For Hoeffding's test, the formal hypotheses tested were $H_{0}:  \Delta = 0$ vs. $H_{A}:  \Delta \ne 0$ where $\Delta = \int\limits_{X \in x}\int\limits_{Y \in y}[F_{XY}(x, y) - F_{X}(x)F_{Y}(y)]^{2} dF_{XY}(x, y)$.  For Pearson's test, the hypotheses were $H_{0}: \rho = 0$ vs. $H_{A}: \rho \ne 0$.  These tests were carried out using `testforDEP::testforDEP()` with the options `test = "HOEFFD"` and `test = "PEARSON"` respectively.
+Correlation tests were chosen for Analysis #3 to determine whether increasing GDP is correlated with decreasing infant mortality.  Hoeffding's Test was selected because it is sensitive to any departure from independence.  Because the relationship appears to be roughly nonlinear, Pearson's test was chosen as the parametric comparator.  Both tests employed two-sided alternatives and assume continuous data, and Pearson's test additionally assumes a linear relationship.  For Hoeffding's test, the formal hypotheses tested were $H_{0}:  \Delta = 0$ vs. $H_{A}:  \Delta \ne 0$ where $$\Delta = \int\limits_{X \in x}\int\limits_{Y \in y}[F_{XY}(x, y) - F_{X}(x)F_{Y}(y)]^{2} dF_{XY}(x, y).$$  For Pearson's test, the competing hypotheses were $H_{0}: \rho = 0$ versus $H_{A}: \rho \ne 0$.  These tests were carried out using `testforDEP::testforDEP()` with the options `test = "HOEFFD"` and `test = "PEARSON"` respectively.
 
 Analysis #4 was chosen because `happiness` appears to have a symmetric, possibly normal distribution on univariate analysis.  Both the one-sample Kolmogorov-Smirnov test and the Shapiro-Wilk test assume a continuous sample distribution.  The formal hypotheses for this analysis were $H_{0}:$ `happiness` is normally distributed vs. for $H_{A}:$ `happiness` is not normally distributed.  Kolmogorov-Smirnov testing was performed via `ks.test()` using the arguments `"pnorm", mean(alldata$happiness), sd(alldata$happiness))` to specify the continuous comparator normal distribution having mean and standard deviation as found in `happiness`.  Shapiro-Wilk testing was carried out using `shapiro.test()`. 
 
@@ -239,12 +239,33 @@ alldata <- alldata %>%
 glimpse(alldata)
 
 len <- dim(alldata)[[1]]
+
+
+fulldata <- read_csv("data/MAT_8790_alldata_2018-12-02.csv")
+fulldata <- fulldata %>% 
+  mutate(country = factor(country)) %>% 
+  mutate(HDI_cat = factor(HDI_cat, levels = c("Low", "Medium", "High", "Very High")))
+
+omitted <- anti_join(fulldata, alldata, by = "country")
 ```
 
 
 ### *Descriptive Statistics and Visualizations*
 
-The analytic dataset represents 111 countries after omitting countries with missing values.  Descriptive statistics and univariate visualizations are presented in Figs. 1-8.  Figure 1 depicts the distribution and descriptive statistics of the `HDIindex` variable, along with counts by country for the `HDI_cat` variable.  `HDIindex` has a very nonnormal appearance, yet has similar mean and median, and a small standard deviation as compared to the mean.  The highest category of human development is the most represented in the data.
+The original dataset represented `r dim(fulldata)[[1]]` countries, and the analytic dataset contained `r dim(alldata)[[1]]` countries after omitting those with missing values.  Of the 94 countries omitted, 26 were highly developed by HDI category, 20 were in the low developmental category, and 18 had unknown HDI category (Table 3).
+
+**Table 3.  Omitted Countries by HDI Category**
+
+```{r omitted_by_HDI, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
+omitted_HDIcat <- table(omitted$HDI_cat, useNA = "ifany")
+
+omitted_HDIcat <- as.tibble(omitted_HDIcat)
+colnames(omitted_HDIcat) <- c("HDI Category", "Frequency")
+omitted_HDIcat_kbl <- omitted_HDIcat %>% kable(format = "markdown")
+omitted_HDIcat_kbl
+```
+
+Descriptive statistics and univariate visualizations are presented in Figs. 1-8.  Figure 1 depicts the distribution and descriptive statistics of the `HDIindex` variable, along with counts by country for the `HDI_cat` variable.  `HDIindex` has a very nonnormal appearance, yet has similar mean and median, and a small standard deviation as compared to the mean.  The highest category of human development is the most represented in the data.
 
 ```{r HDIplots, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 HDIindex_hist <- ggplot(data = alldata, aes(x = HDIindex)) +
@@ -436,7 +457,7 @@ analysis1_para <- t.test(alldata$HDIindex,
 analysis1_para
 ```
 
-For Analysis 1, the one-sample sign test yielded a *p*-value of $p_{sign} =$ `r round(analysis1_nonpara$p.value, digits = 3)`.  Since $p_{sign} < \alpha$, the null hypothesis was rejected, leading to the conclusion that the median and mean HDI index values are not equal.  However, the parametric test resulted in $p_{t} =$ `r round(analysis1_para$p.value, digits = 3)`.  Since $p_{t} > \alpha$, the null hypothesis was retained with the conclusion that, at the $\alpha = 0.05$ level, there is insufficient evidence to assert that the mean and median are different in the parametric case.  The sign test is appropriate for this data; however, due to the clear nonnormality of the `HDIindex` data, the *t*-test is inappropriate because the assumption of normality is violated.  Thus the sign test results were retained.
+For Analysis 1, the one-sample sign test yielded a *p*-value of $p_{sign} =$ `r round(analysis1_nonpara$p.value, digits = 3)`.  Since $p_{sign} < \alpha$, the null hypothesis was rejected, leading to the conclusion that the median and mean HDI index values are not equal.  However, the parametric test resulted in $p_{t} =$ `r round(analysis1_para$p.value, digits = 3)`.  Since $p_{t} > \alpha$, the null hypothesis was retained with the conclusion that, at the $\alpha = 0.05$ level, there is insufficient evidence to assert that the mean and median are different in the parametric case.  The sign test is appropriate for this data; however, due to the clear nonnormality of the `HDIindex` data, the *t*-test is inappropriate because the assumption of normality is violated.  Thus the nonparametric method results were retained.
 
 
 <!-- ### *Analysis #2* -->
@@ -481,7 +502,7 @@ analysis3_para <- testforDEP(alldata$logGDP, alldata$infantmort, test = "PEARSON
 analysis3_para
 ```
 
-When testing for independence in Analysis 3 for both the nonparametric and parametrics cases, the *p*-values are less than 0.0001, leading to the rejection of $H_{0}$ (i.e., independence) and the conclusion that, at the $\alpha = 0.05$ level, there is sufficient evidence of an association between log(GDP) and infant mortality.  The correlation matrix shows that this is an inverse relationship - i.e., as log(GDP) increases, infant mortality decreases.  This relationship was sufficiently linear to yield a significant *p*-value on Pearson's test, so although the scatterplot in Fig. 8 appears nonlinear, it may in fact be linear.
+When testing for independence in Analysis 3 for both the nonparametric and parametrics cases, the *p*-values were less than 0.0001, leading to the rejection of $H_{0}$ (i.e., independence) and the conclusion that, at the $\alpha = 0.05$ level, there is sufficient evidence of an association between log(GDP) and infant mortality.  The correlation matrix shows that this is an inverse relationship - i.e., as log(GDP) increases, infant mortality decreases.  This relationship was sufficiently linear to yield a significant *p*-value on Pearson's test, so although the scatterplot in Fig. 8 appears nonlinear, it may in fact be linear.  Either test is acceptable in this case.
 
 
 <!-- ### *Analysis #4* -->
@@ -494,7 +515,7 @@ analysis4_para <- shapiro.test(alldata$happiness)
 analysis4_para
 ```
 
-In Analysis 4, the one-sample Kolmogorov-Smirnov test yielded p-value $p_{KS} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, though neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{KS}$.
+In Analysis 4, the one-sample Kolmogorov-Smirnov test yielded p-value $p_{KS} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{KS}$.
 
 
 <!-- ### *Analysis #5* -->
@@ -520,15 +541,25 @@ analysis5_plot
 ```
 
 
-
-
 ## **Discussion**
+
+Nonparametric methods are appropriate when analyzing data that violates the assumption of normality, and they can also be applied to normal data, but may be less powerful than the traditional parametric tests.  The dataset used in this study consists of real-world QoL data, many variables of which fail normality.  Across all five analyses, the nonparametric methods performed acceptably, whereas the parametric equivalents were only acceptable for two of the analyses.  
+
+THINK ABOUT WHAT ELSE TO ADD TO THE DISCUSSION - ADDRESS HOW UNDERSTANDING THE RELATIONSHIPS BETWEEN QOL MEASURES IS USEFUL
 
 
 ### *Limitations*
 
+An important limitation to this analysis is that countries with missing data were excluded from the analytic dataset.  This may introduce bias, as a nontrivial proportion of countries omitted belong to the low and medium HDI developmental categories, and these countries are likely to perform poorly on the other QoL measures considered.
+
+Another limitation is the inherent interrelatedness of some of these variables, particularly the compound indices.  For example, one factor considered in the Human Development Index is life expectancy, so it is unsurprising that a strong association between `HDIindex` and `birth_MF` was seen in the correlation matrix.  Similarly, some subitems of the Social Progress Index overlap with those included in the Gender Equality Index.  Correlation tests are possible in such cases but may be inappropriate unless the underlying measures are fundamentally different.
+
+Finally, this study is limited by the variables included in this dataset.  There exist many other QoL measures that would have been worth including in this analysis, such as measures of educational attainment, civilian indebtedness, and population-level health utilities.  Future work may entail expanding the study to include such variables.
+
 
 ## **Conclusion**
+
+Nonparametric methods represent an important toolset when working with data that violates normality.  This analysis gives evidence that they can perform favorably as compared to their parametric equivalents, and should be considered when analyzing data that is unsuitable for parametric approaches.
 
 
 ## **References**
