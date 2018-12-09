@@ -7,24 +7,13 @@ output:
   html_document: default
 geometry: margin = 0.5in
 references:
-- URL: https://github.com/kmprioliPROF/MAT_8452_Final_Project
+- URL: https://data.worldbank.org/indicator/ny.gdp.mktp.cd?view=map&year_high_desc=true 
   author:
-  - family: Prioli
-    given: Katherine M.
-  id: kmpgit
+  - family: The World Bank
+  id: worldbank_gdp
   issued:
-    month: 12
     year: 2018
-  title: MAT_8452_Final_Project
-- URL: https://github.com/kmprioliPROF/MAT_8790_Final_Project
-  author:
-  - family: Prioli
-    given: Katherine M.
-  id: kmpgit_8790
-  issued:
-    month: 12
-    year: 2018
-  title: MAT_8790_Final_Project
+  title: Gross Domestic Product
 - URL: http://apps.who.int/gho/data/view.main.182?lang=en
   author:
   - family: World Health Organization
@@ -39,34 +28,6 @@ references:
   issued:
     year: 2018
   title: Life Expectancy
-- URL: http://reports.weforum.org/global-gender-gap-report-2016/rankings/
-  author:
-  - family: World Economic Forum
-  id: wef_gender
-  issued:
-    year: 2016
-  title: Gender Equality
-- URL: http://reports.weforum.org/global-gender-gap-report-2016/measuring-the-global-gender-gap/
-  author:
-  - family: World Economic Forum
-  id: wef_gender_desc
-  issued:
-    year: 2016
-  title: Measuring the Global Gender Gap
-- URL: https://data.worldbank.org/indicator/ny.gdp.mktp.cd?view=map&year_high_desc=true 
-  author:
-  - family: The World Bank
-  id: worldbank_gdp
-  issued:
-    year: 2018
-  title: Gross Domestic Product
-- URL: http://hdr.undp.org/en/data
-  author:
-  - family: The United Nations Development Programme
-  id: un_dvlpt
-  issued:
-    year: 2018
-  title: Human Development Index
 - URL: http://hdr.undp.org/en/content/human-development-index-hdi
   author:
   - family:  The United Nations Development Programme
@@ -74,13 +35,13 @@ references:
   issued:
     year: 2018
   title: Human Development Reports - Human Development Index (HDI)
-- URL: https://www.socialprogress.org/?tab=4
+- URL: http://hdr.undp.org/en/data
   author:
-  - family: Social Progress Imperative
-  id: socialprog
+  - family: The United Nations Development Programme
+  id: un_dvlpt
   issued:
     year: 2018
-  title: Social Progress Index
+  title: Human Development Index
 - URL: https://www.socialprogress.org/index
   author:
   - family: Social Progress Imperative
@@ -88,6 +49,27 @@ references:
   issued:
     year: 2018
   title:  Social Progress Index - Overview
+- URL: https://www.socialprogress.org/?tab=4
+  author:
+  - family: Social Progress Imperative
+  id: socialprog
+  issued:
+    year: 2018
+  title: Social Progress Index
+- URL: http://reports.weforum.org/global-gender-gap-report-2016/measuring-the-global-gender-gap/
+  author:
+  - family: World Economic Forum
+  id: wef_gender_desc
+  issued:
+    year: 2016
+  title: Measuring the Global Gender Gap
+- URL: http://reports.weforum.org/global-gender-gap-report-2016/rankings/
+  author:
+  - family: World Economic Forum
+  id: wef_gender
+  issued:
+    year: 2016
+  title: Gender Equality
 - URL: http://worldhappiness.report/ed/2018/
   author:
   - family: Helliwell
@@ -100,6 +82,24 @@ references:
   issued:
     year: 2018
   title: World Happiness Report
+- URL: https://github.com/kmprioliPROF/MAT_8790_Final_Project
+  author:
+  - family: Prioli
+    given: Katherine M.
+  id: kmpgit_8790
+  issued:
+    month: 12
+    year: 2018
+  title: MAT_8790_Final_Project
+- URL: https://github.com/kmprioliPROF/MAT_8452_Final_Project
+  author:
+  - family: Prioli
+    given: Katherine M.
+  id: kmpgit
+  issued:
+    month: 12
+    year: 2018
+  title: MAT_8452_Final_Project
 abstract: "BACKGROUND Increasing globalization has generated interest in comparing countries by key quality of life (QoL) measures such as life expectancy, gender equality, and happiness, among others.  When considering how countries compare by QoL, it is vital to understand how the measures are related, if at all, and in what ways the statistical tests chosen affect the results.  METHODS A dataset containing country names and selected QoL measures for 2016 was explored through descriptive statistics and sensible univariate and bivariate visualizations.  Six sets of hypotheses pertaining to relationships within the data were generated and tested with both nonparametric methods and their parametric equivalents, and results of these paired analyses were compared.  RESULTS Text goes here CONCLUSION text goes here"
 ---
 
@@ -109,6 +109,8 @@ abstract: "BACKGROUND Increasing globalization has generated interest in compari
      * Be sure to state hypotheses AND ASSUMPTIONS for each
   * Comment on the appropriateness of nonparametric methods
   * Compute confidence intervals where appropriate
+  * Discussion
+     * Note that omitting NAs may omit less developed countries (these tend to be the ones with less data availability)
   * Discuss limitations
   * Make sure the ordering of references is appropriate for the text
   * ENSURE ALL OUTPUT IS NUMBERED
@@ -252,7 +254,7 @@ len <- dim(alldata)[[1]]
 
 ### *Descriptive Statistics and Visualizations*
 
-First, exploring the Human Development Index variables:
+Descriptive statistics and univariate visualizations for the dataset are presented in Figs. 1-8.  Figure 1 depicts the distribution and descriptive statistics of the `HDIindex` variable, along with counts by country for the `HDI_cat` variable.  `HDIindex` has a very nonnormal appearance, yet has similar mean and median, and a small standard deviation as compared to the mean.  The highest category of human development is the most represented in the data.
 
 ```{r HDIplots, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 HDIindex_hist <- ggplot(data = alldata, aes(x = HDIindex)) +
@@ -267,7 +269,7 @@ HDIcat_bar <- ggplot(data = alldata, aes(x = HDI_cat)) +
             hjust = 0.5, position = position_stack(vjust = 0.5)) +
   xlab("Human Development Category") +
   ylab("Count") +
-  ggtitle("Country Counts by Category")
+  ggtitle("Country Counts by HDI Category")
 
 HDIsumm <- broom::tidy(round(summary(alldata$HDIindex), digits = 3))
 sd <- round(sd(alldata$HDIindex), digits = 3)
@@ -281,9 +283,9 @@ grid.arrange(HDIindex_hist, HDIcat_bar, HDIsumm_grob, nrow = 2, heights = c(0.8,
                             x = 0.025, hjust = 0))
 ```
 
-Exploring the Social Progress Index data:
+`SPI`, described in Fig. 2, appears to have a multimodal distribution, with mean and median quite similar in value.
 
-```{r SPIplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
+```{r SPIplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 SPI_hist <- ggplot(data = alldata, aes(x = SPI)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$SPI))))) +
   xlab("Social Progress Index") +
@@ -299,7 +301,7 @@ SPIsumm_grob <- tableGrob(t(SPIsumm), theme = ttheme_minimal())
 grid.arrange(SPI_hist, SPIsumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
-Next, exploring GDP by summary statistics:
+Summary statistics of the `GDP_USD_2018` variable (Table 3) show a wide range for this variable, with median an order of magnitude less than mean, and standard deviation an order of magnitude greater than mean.  After log transformation, the distribution appears possibly bimodal with mean and median reasonably close in value and standard deviation smaller than both.
 
 **Table 3.  GDP SUmmary Statistics**
 
@@ -313,14 +315,12 @@ GDPsumm <- GDPsumm %>%
 GDPsumm
 ```
 
-Taking the log transform and plotting:
-
-```{r GDPplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
+```{r GDPplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 GDP_hist <- ggplot(data = alldata, aes(x = log(GDP_USD_2018))) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$GDP_USD_2018))))) +
   xlab("log(GDP) ($US 2018)") +
   ylab("Count") +
-  ggtitle("Figure 3.  Gross Domestic Product Distribution, \nLog Transform") +
+  ggtitle("Figure 3.  Gross Domestic Product Distribution, Log Transform") +
   scale_x_continuous(labels = scales::dollar_format(prefix = "$"))
 
 logGDPsumm <- broom::tidy(round(summary(alldata$logGDP), digits = 3))
@@ -332,9 +332,9 @@ logGDPsumm_grob <- tableGrob(t(logGDPsumm), theme = ttheme_minimal())
 grid.arrange(GDP_hist, logGDPsumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
-Exploring the World Happiness Report data:
+Per Fig. 4, the World Happiness Score appears roughly normally distributed.
 
-```{r happinessplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
+```{r happinessplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 happiness_hist <- ggplot(data = alldata, aes(happiness)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$happiness))))) +
   xlab("Happiness Score") +
@@ -350,9 +350,9 @@ happinesssumm_grob <- tableGrob(t(happinesssumm), theme = ttheme_minimal())
 grid.arrange(happiness_hist, happinesssumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
-Exploring the gender equality index data:
+Figure 5 shows a roughly symmetric, possibly trimodal distribution for `genderequality_index`, with mean and median very close in value, and standard deviation approximately a tenth of either measure of location.
 
-```{r genderplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
+```{r genderplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 gender_hist <- ggplot(data = alldata, aes(x = genderequality_index)) +
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
   xlab("Gender Equality Index") +
@@ -368,9 +368,9 @@ gendersumm_grob <- tableGrob(t(gendersumm), theme = ttheme_minimal())
 grid.arrange(gender_hist, gendersumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
-Exploring the WHO infant mortality rate data:
+The probability of infant mortality is heavily right-skewed per Fig. 6.
 
-```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 3}
+```{r infantmortplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 infantmort_hist <- ggplot(data = alldata, aes(x = infantmort)) + 
   geom_histogram(bins = ceiling(sqrt(len - sum(is.na(alldata$genderequality_index))))) +
   xlab("Probability of Infant Mortality") +
@@ -386,7 +386,7 @@ infantmortsumm_grob <- tableGrob(t(infantmortsumm), theme = ttheme_minimal())
 grid.arrange(infantmort_hist, infantmortsumm_grob, nrow = 1, widths = c(0.8, 0.2))
 ```
 
-Exploring the WHO life expectancy data:
+Figure 7 explores total life expectancy at birth vs. age 60.  Life expectancy at birth appears left-skewed, but total life expectancy at sixty looks reasonably symmetric.  These data indicate that, across all countries, a person who survives until at least 60 years has a longer total life expectancy than does the general world population at birth.
 
 ```{r lifeexpplot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 lifeexp_birth_box <- ggplot(data = alldata, aes(y = birth_MF)) +
@@ -415,10 +415,8 @@ birth_MFsumm <- cbind(birth_MFsumm, sd)
 colnames(birth_MFsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
 birth_MFsumm_grob <- tableGrob(birth_MFsumm, theme = ttheme_minimal(), rows = NULL)
 
-# Total Life Expectancy at Sixty
-
-sixty_MFsumm <- broom::tidy(round(summary(alldata$sixty_MF), digits = 3))
-sd <- round(sd(alldata$sixty_MF), digits = 3)
+sixty_MFsumm <- broom::tidy(round(summary(alldata$sixty_MF + 60), digits = 3))
+sd <- round(sd(alldata$sixty_MF + 60), digits = 3)
 sixty_MFsumm <- cbind(sixty_MFsumm, sd)
 colnames(sixty_MFsumm) <- c("Min", "Q1", "Median", "Mean", "Q3", "Max", "SD")
 sixty_MFsumm_grob <- tableGrob(sixty_MFsumm, theme = ttheme_minimal(), rows = NULL)
@@ -432,7 +430,9 @@ grid.arrange(lifeexp_birth_box, lifeexp_sixty_box,
                             x = 0.025, hjust = 0))
 ```
 
-Investigating pairwise relationships between continuous variables:
+Figure 8 depcits pairwise relationships between continuous variables.  Strong positive linear relationships are seen between `HDIindex` and `SPI`, `HDIindex` and `birth_MF`, and `SPI` and `birth_MF`, indicating that higher levels of social progress and human development generally correlate with a longer life expectancy at birth.  Additionally, positive linear relationships are seen between `happiness` and `birth_MF`, between `happiness` and `HDIindex`, and between `happiness` and `SPI`, indicating that increasing levels of human development and social progress generally lead to increased happiness (though there is considerable spread in the data), and that happiness and longevity may also be correlated.
+
+Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  These indicate that increasing human development and social progress levels correlate with lower levels of infant mortality, and that as infant mortality decreases, life expectancy at birth increases.
 
 ```{r calc_corrplot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 8}
 alldata <- alldata %>% mutate(logGDP = log(GDP_USD_2018))
@@ -441,10 +441,6 @@ corrplot <- ggpairs(data = alldata, columns = c(5, 15, 8, 10:14),
                     title = "Figure 8.  Correlation Matrix, Continuous Variables")
 corrplot
 ```
-
-Strong positive linear relationships are seen between `HDIindex` and `SPI`, `happiness`, and `birth_MF`; between `SPI` and `happiness`, `birth_MF`, and `sixty_MF`; and between `happiness` and `sixty_MF`.  Additionally, strong positive relationships that are possibly nonlinear are seen between `HDI_index` and `sixty_MF`, and between `birth_MF` and `sixty_MF`.
-
-Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  A strong negative nonlinear relationship is seen between `infantmort` and `sixty_MF`.
 
 ### *Nonparametric and Parametric Analyses*
 
