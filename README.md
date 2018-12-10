@@ -20,7 +20,7 @@ The repo is organized as follows:
 | Final_Project.Rproj                       | .Rproj project container                                            |
 | Prioli_Final_Proj.Rmd                     | Notebook containing source code and report                          |
 | Prioli_Final_Proj.pdf                     | Knitted notebook                                                    |
-| Prioli_Final_Proj.pptx                    | (COMING SOON) Presentation slides                                   |
+| Prioli_Final_Proj.pptx                    | Presentation slides                                                 |
 
 
 ## **Data Sources**
