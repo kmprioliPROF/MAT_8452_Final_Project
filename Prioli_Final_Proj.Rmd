@@ -211,7 +211,7 @@ tbl2_kbl <- tbl2 %>%
 tbl2_kbl
 ```
 
-A two-sided one-sample test was chosen for Analysis #1 because the `HDIindex` distribution is very non-normal, yet its median and mean appear quite similar and the standard deviation is small.  The one-sample sign test assumes that the sample is random with independent draws, and the data are continuous.  Its parametric equivalent, the one-sample *t*-test, shares these assumptions and also requires normality of the sampling distribution.  The formal hypotheses tested for the sign test were $H_{0}:  m =$ `mean(alldata$HDIindex)` versus $H_{A}:  m \ne$ `mean(alldata$HDIindex)`, whereas the one-sample *t*-test assessed the complementary hypotheses $H_{0}:  \mu =$ `median(alldata$HDIindex)` versus $H_{A}:  \mu \ne$ `median(alldata$HDIindex)`.  The sign test was carried out using `BSDA::SIGN.test()` and the one-sample *t*-test via `t.test()`.
+Because the `HDIindex` distribution is very non-normal, yet its median and mean appear quite similar, Analysis #1 employed a two-sided one-sample test to find a 95% confidence interval (CI) for the population median.  The one-sample sign test assumes that the sample is random with independent draws, and the data are continuous.  Its parametric equivalent, the one-sample *t*-test, used to find the 95% CI for the population mean, shares these assumptions and also requires normality of the sampling distribution.  The CI for the median was found via `BSDA::SIGN.test()` and the CI for the mean was found via `t.test()`.
 
 Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindx`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.  Additionally, because simulation is the preferred method when ties are present for Kendall's Tau, the variables were first assessed for ties before selecting a method for Kendall's Tau.  The competing hypotheses for this analysis were $H_{0}: \tau = 0$ vs. $H_{A}: \tau \ne 0$ (for Kendall's Tau) and $H_{0}: \rho = 0$ vs. $H_{A}: \rho \ne 0$ (for Pearson's Test).  Both tests were carried out via `cor.test()` using `method = "kendall"` or `method = "pearson"` as appropriate.
 
@@ -443,19 +443,17 @@ corrplot
 
 ```{r analysis1, include = FALSE, echo = FALSE}
 analysis1_nonpara <- SIGN.test(x = alldata$HDIindex, 
-                               md = mean(alldata$HDIindex), 
                                alternative = "two.sided",
                                conf.level = 0.95)
 analysis1_nonpara
 
 analysis1_para <- t.test(alldata$HDIindex,
-                         mu = median(alldata$HDIindex),
                          alternative = "two.sided",
                          conf.level = 0.95)
 analysis1_para
 ```
 
-For Analysis 1, the one-sample sign test yielded a *p*-value of $p_{sign} =$ `r round(analysis1_nonpara$p.value, digits = 3)`.  Since $p_{sign} < \alpha$, the null hypothesis was rejected, leading to the conclusion that the median and mean HDI index values are not equal.  The 95% confidence interval for the true median is (`r round(analysis1_nonpara$conf.int[1], 4)`, `r round(analysis1_nonpara$conf.int[2], 4)`), which lies above the  mean value of `r round(mean(alldata$HDIindex), 4)`.  However, the parametric test resulted in $p_{t} =$ `r round(analysis1_para$p.value, digits = 3)`.  Since $p_{t} > \alpha$, the null hypothesis was retained with the conclusion that, at the $\alpha = 0.05$ level, there is insufficient evidence to assert that the mean and median are different in the parametric case.  The corresponding 95% confidence interval is (`r round(analysis1_para$conf.int[1], 4)`, `r round(analysis1_para$conf.int[2], 4)`), which contains the median value of `r round(median(alldata$HDIindex), digits = 4)`.  The sign test is appropriate for this data; however, due to the clear nonnormality of the `HDIindex` data, the *t*-test is inappropriate because the assumption of normality is violated.  Thus the nonparametric method results were retained.
+For Analysis 1, the 95% confidence interval for the population median was (`r round(analysis1_nonpara$conf.int[1], 4)`, `r round(analysis1_nonpara$conf.int[2], 4)`), and the CI for the population mean was (`r round(analysis1_para$conf.int[1], 4)`, `r round(analysis1_para$conf.int[2], 4)`).
 
 
 <!-- ### *Analysis #2* -->
