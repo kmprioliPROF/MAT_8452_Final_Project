@@ -107,7 +107,6 @@ abstract: "BACKGROUND Increasing globalization has generated interest in compari
   * Abstract:  flesh out Results more
   * Fix Table 2 formatting if possible
   * Discussion:  flesh out more; add Strengths?
-  * Results:  try to get 95% confidence band working for Analysis 4
 -->
 
 
@@ -124,6 +123,7 @@ library(grid)            # For textGrob() to annotate grid.arrange() elements
 library(kableExtra)      # For nicer output tables
 library(GGally)          # For ggpairs() correlation matrix
 library(BSDA)            # For SIGN.test()
+library(nortest)         # For lillie.test()
 library(testforDEP)      # For testforDEP("HOEFFD")
 library(jmuOutlier)      # For perm.f.test()
 
@@ -180,12 +180,12 @@ tbl2_vars <- c("HDIindex",
                "HDI_cat, infantmort")
 tbl2_null <- c("The sample median is equal to its mean",
                "Human development and social progress are not associated",
-               "There is no relationship between log(GDP) and infant mortality",
+               "There is no relationship between log(GDP) and gender equality index",
                "Happiness is normally distributed",
                "Infant mortality rate is the same across levels of human development")
 tbl2_alt <- c("The sample median differs from its mean",
               "Human development and social progress are correlated",
-              "There is a relationship between log(GDP) and infant mortality",
+              "There is a relationship between log(GDP) and gender equality index",
               "Happiness is not normally distributed",
               "Infant mortality rate differs by level of human development")
 tbl2_nonpara <- c("One-Sample Sign Test",
@@ -217,7 +217,7 @@ Analysis #2 was motivated by the correlation matrix analysis, which indicates a 
 
 Correlation tests were chosen for Analysis #3 to determine whether log GDP and gender equality were associated.  No obvious relationship was seen between these two variables on the correlation plot.  Hoeffding's Test was selected because it is sensitive to any departure from independence, and Pearson's test was chosen as the parametric comparator.  Both tests employed two-sided alternatives and assume continuous data, and Pearson's test additionally assumes a linear relationship.  For Hoeffding's test, the formal hypotheses tested were $H_{0}:  \Delta = 0$ vs. $H_{A}:  \Delta \ne 0$ where $$\Delta = \int\limits_{X \in x}\int\limits_{Y \in y}[F_{XY}(x, y) - F_{X}(x)F_{Y}(y)]^{2} dF_{XY}(x, y).$$  For Pearson's test, the competing hypotheses were $H_{0}: \rho = 0$ versus $H_{A}: \rho \ne 0$.  These tests were carried out using `testforDEP::testforDEP()` with the options `test = "HOEFFD"` and `test = "PEARSON"` respectively.
 
-Analysis #4 was chosen because `happiness` appears to have a symmetric, possibly normal distribution on univariate analysis.  Both the one-sample Kolmogorov-Smirnov test and the Shapiro-Wilk test assume a continuous sample distribution.  The formal hypotheses for this analysis were $H_{0}:$ `happiness` is normally distributed vs. for $H_{A}:$ `happiness` is not normally distributed.  Kolmogorov-Smirnov testing was performed via `ks.test()` using the arguments `"pnorm", mean(alldata$happiness), sd(alldata$happiness))` to specify the continuous comparator normal distribution having mean and standard deviation as found in `happiness`.  Shapiro-Wilk testing was carried out using `shapiro.test()`. 
+Analysis #4 was chosen because `happiness` appears to have a symmetric, possibly normal distribution on univariate analysis.  To test for normality, the Lilliefors test (a normality-specific version of the one-sample Kolmogorov-Smirnov test) was chosen as the nonparametric test, and the Shapiro-Wilk test was chosen as the parametric alternative.  Both assume a continuous sample distribution.  The formal hypotheses for this analysis were $H_{0}:$ `happiness` is normally distributed vs. for $H_{A}:$ `happiness` is not normally distributed.  Lilliefors testing was performed via `nortest::lillie.test()`, and Shapiro-Wilk testing was carried out using `shapiro.test()`. 
 
 To test for a difference in infant mortality rate by human development category, Analysis #5 employed the permutation F-test and ANOVA as the nonparametric and parametric tests respectively.  Both tests assume samples are independent with constant variance, and ANOVA additionally assumes a normal distribution.  The log transform of infant mortality rate was used to ensure that the assumption of constant variance would be met.  The competing hypotheses were $H_{0}:$  the cumulative distribution functions (CDFs) for log infant mortality were equal across all four human development levels vs. $H_{A}:$  at least one of these CDFs differs.  The permutation F-test was performed via `jmuOutlier::perm.f.test()` with 1,000 simulations because the sample size was prohibitively large for calculating an exact *p*-value.  The `aov()` function was used for ANOVA testing.
 
@@ -487,7 +487,7 @@ analysis2_para <- cor.test(alldata$SPI, alldata$HDIindex, method = "pearson")
 analysis2_para
 ```
 
-For Analysis 2, ties were not present in either `SPI` or `HDIindex`; thus, Kendall's Tau was tested using the usual `cor.test(x, y, method = "kendall")` approach.  When testing for independence in both the nonparametric and parametrics cases, the *p*-values are less than 0.0001, with correlation coefficients $r_{\tau}$ = `r round(analysis2_nonpara$estimate, digits = 3)[[1]]` and *r* = `r round(analysis2_para$estimate, digits = 3)[[1]]` respectively.  Both are statistically significant and represent strong evidence of a linear relationship between social progress and human developmental level, thus $H_{0}$ was rejected with the conclusion that, at the $\alpha = 0.05$ level, social progress and human development are correlated.  Both tests assume continuous data, which is satisfied, and both yield the same *p*-value.  The nonparametric method is more conservative, with a slightly smaller correlation coefficient for Kendall's Tau as compared to Pearson's, so the nonparametric method results were retained.
+For Analysis 2, ties were not present in either `SPI` or `HDIindex`; thus, Kendall's Tau was tested using the usual `cor.test(x, y, method = "kendall")` approach.  When testing for independence in both the nonparametric and parametrics cases, the *p*-values are less than 0.0001, with correlation coefficients $r_{\tau}$ = `r round(analysis2_nonpara$estimate, digits = 3)[[1]]` and *r* = `r round(analysis2_para$estimate, digits = 3)[[1]]` respectively.  Both are statistically significant and represent strong evidence of a linear relationship between social progress and human developmental level, thus $H_{0}$ was rejected with the conclusion that, at the $\alpha = 0.05$ level, social progress and human development are correlated.  Both tests assume continuous data, which is satisfied, and both yield the same *p*-value.  Both the nonparametric and parametric methods are appropriate.
 
 
 <!-- ### *Analysis #3* -->
@@ -506,46 +506,14 @@ When testing for independence in Analysis 3, Hoeffding's test returned $p_{Hoeff
 <!-- ### *Analysis #4* -->
 
 ```{r analysis4, include = FALSE, echo = FALSE}
-analysis4_nonpara <- ks.test(alldata$happiness, "pnorm", mean(alldata$happiness), sd(alldata$happiness))
+analysis4_nonpara <- lillie.test(alldata$happiness)
 analysis4_nonpara
 
 analysis4_para <- shapiro.test(alldata$happiness)
 analysis4_para
 ```
 
-In Analysis 4, the one-sample Kolmogorov-Smirnov test yielded p-value $p_{KS} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{KS}$.
-
-```{r analysis4_plot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
-hap_mean <- round(mean(alldata$happiness), digits = 3)
-hap_sd <- round(sd(alldata$happiness), digits = 3)
-
-# hap_mean_CI_low <- t.test(alldata$happiness, mu = mean(alldata$happiness))$conf.int[1]
-# hap_mean_CI_high <- t.test(alldata$happiness, mu = mean(alldata$happiness))$conf.int[2]
-
-tval <- 1.96
-
-alldata <- alldata %>% 
-  mutate(hap_CI_low = happiness - tval * sd(happiness) / sqrt(len)) %>% 
-  mutate(hap_CI_high = happiness + tval * sd(happiness) / sqrt(len))
-
-analysis4_plot <- ggplot(data = alldata, aes(x = happiness)) +
-  geom_histogram(aes(y = ..density..),
-                 bins = ceiling(sqrt(len - sum(is.na(alldata$happiness))))) +
-  stat_function(fun = dnorm, args = list(mean = mean(alldata$happiness), 
-                                         sd = sd(alldata$happiness)),
-                color = "#233B43", size = 1) +
-  #geom_smooth(data = alldata, aes(y = ..density.., ymin = hap_CI_low, ymax = hap_CI_high)) +
-  # stat_function(fun = dnorm, args = list(mean = mean(alldata$hap_CI_low),
-  #                                        sd = sd(alldata$hap_CI_low)),
-  #               color = "green", size = 1) +
-  # stat_function(fun = dnorm, args = list(mean = mean(alldata$hap_CI_high),
-  #                                        sd = sd(alldata$hap_CI_high)),
-  #               color = "red", size = 1) +
-  xlab("Happiness Score") +
-  ylab("Density") +
-  ggtitle(paste0("Figure 9.  Happiness Score with N(\u03bc=" , hap_mean, ", \u03c3\u00b2=", hap_sd, ")"))
-analysis4_plot
-```
+In Analysis 4, the Lilliefors test yielded p-value $p_{Lilliefors} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{Lilliefors}$.
 
 
 <!-- ### *Analysis #5* -->
