@@ -178,17 +178,17 @@ tbl2_vars <- c("HDIindex",
                "logGDP, infantmort",
                "happiness",
                "HDI_cat, infantmort")
-tbl2_null <- c("The sample median is equal to its mean",
+tbl2_null <- c("(No formal hypothesis test) Nonparametric 95% confidence interval for the mean",
                "Human development and social progress are not associated",
                "There is no relationship between log(GDP) and gender equality index",
                "Happiness is normally distributed",
                "Infant mortality rate is the same across levels of human development")
-tbl2_alt <- c("The sample median differs from its mean",
+tbl2_alt <- c("Parametric 95% CI for the mean",
               "Human development and social progress are correlated",
               "There is a relationship between log(GDP) and gender equality index",
               "Happiness is not normally distributed",
               "Infant mortality rate differs by level of human development")
-tbl2_nonpara <- c("One-Sample Sign Test",
+tbl2_nonpara <- c("Bootstrapping",
                   "Kendall's Tau",
                   "Hoeffding's Test",
                   "One-Sample Kolmogorov-Smirnov Test",
@@ -211,7 +211,7 @@ tbl2_kbl <- tbl2 %>%
 tbl2_kbl
 ```
 
-Because the `HDIindex` distribution is very non-normal, yet its median and mean appear quite similar, Analysis #1 employed a two-sided one-sample test to find a 95% confidence interval (CI) for the population median.  The one-sample sign test assumes that the sample is random with independent draws, and the data are continuous.  Its parametric equivalent, the one-sample *t*-test, used to find the 95% CI for the population mean, shares these assumptions and also requires normality of the sampling distribution.  The CI for the median was found via `BSDA::SIGN.test()` and the CI for the mean was found via `t.test()`.
+In Analysis #1, bootstrapping and the one-sample *t*-test were employed to find nonparametric and parametric 95% confidence intervals (CIs) for the population mean.  The widths of these intervals were compared, and assumptions required for the *t*-test were assessed.  The bootstrapping CI for the mean was found using 1000 sampling iterations with replacement via `sample()`, and the CI for the mean was found via `t.test()`.
 
 Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindx`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.  Additionally, because simulation is the preferred method when ties are present for Kendall's Tau, the variables were first assessed for ties before selecting a method for Kendall's Tau.  The competing hypotheses for this analysis were $H_{0}: \tau = 0$ vs. $H_{A}: \tau \ne 0$ (for Kendall's Tau) and $H_{0}: \rho = 0$ vs. $H_{A}: \rho \ne 0$ (for Pearson's Test).  Both tests were carried out via `cor.test()` using `method = "kendall"` or `method = "pearson"` as appropriate.
 
@@ -439,26 +439,9 @@ corrplot
 
 ### *Nonparametric and Parametric Analyses*
 
-<!-- ### *Analysis #1*
-
-```{r analysis1, include = FALSE, echo = FALSE}
-analysis1_nonpara <- SIGN.test(x = alldata$HDIindex, 
-                               alternative = "two.sided",
-                               conf.level = 0.95)
-analysis1_nonpara
-
-analysis1_para <- t.test(alldata$HDIindex,
-                         alternative = "two.sided",
-                         conf.level = 0.95)
-analysis1_para
-```
-
-For Analysis 1, the 95% confidence interval for the population median was (`r round(analysis1_nonpara$conf.int[1], 4)`, `r round(analysis1_nonpara$conf.int[2], 4)`), and the CI for the population mean was (`r round(analysis1_para$conf.int[1], 4)`, `r round(analysis1_para$conf.int[2], 4)`). -->
-
-<!-- ### *Analysis #1 alt* -->
+<!-- ### *Analysis #1* -->
 
 ```{r analysis1_alt, include = FALSE, echo = FALSE}
-#analysis1_alt_nonpara
 n <- length(alldata$HDIindex)
 nBS <- 1000
 set.seed(19811221)
@@ -478,27 +461,27 @@ meanCI_BS[1, 1] <- round(quantile(BSout$BSmean, 0.025), digits = 4)
 meanCI_BS[1, 2] <- round(quantile(BSout$BSmean, 0.975), digits = 4)
 meanCI_BS$width = meanCI_BS$CI_high - meanCI_BS$CI_low
 
-analysis1_alt_nonpara <- meanCI_BS
-analysis1_alt_nonpara
+analysis1_nonpara <- meanCI_BS
+analysis1_nonpara
 
 
-analysis1_alt_para <- t.test(alldata$HDIindex,
-                         alternative = "two.sided",
-                         conf.level = 0.95)
+analysis1_ttest <- t.test(alldata$HDIindex,
+                          alternative = "two.sided",
+                          conf.level = 0.95)
 
 meanCI_ttest <- tibble(CI_low = numeric(),
                        CI_high = numeric(),
                        width = numeric())
 
-meanCI_ttest[1, 1] <- round(analysis1_alt_para$conf.int[1], digits = 4)
-meanCI_ttest[1, 2] <- round(analysis1_alt_para$conf.int[2], digits = 4)
+meanCI_ttest[1, 1] <- round(analysis1_ttest$conf.int[1], digits = 4)
+meanCI_ttest[1, 2] <- round(analysis1_ttest$conf.int[2], digits = 4)
 meanCI_ttest$width = meanCI_ttest$CI_high - meanCI_ttest$CI_low
 
-analysis1_alt_para <- meanCI_ttest
-analysis1_alt_para
+analysis1_para <- meanCI_ttest
+analysis1_para
 ```
 
-In Analysis 1, the bootstrapping approach yielded a 95% CI for the mean of (`r analysis1_alt_nonpara[[1]], analysis1_alt_nonpara[[2]]`), having width `r analysis1_alt_nonpara[[3]]`.  The parametric approach via `t.test()` yielded a 95% CI given by (`r analysis1_alt_para[[1]], analysis1_alt_para[[2]]`), having width `r analysis1_alt_para[[3]]`.  The nonparametric method yielded the smaller confidence interval, having `r patse0(round((analysis1_alt_nonpara[[3]] / analysis1_alt_para[[3]]) * 100, digits = 2), "%"` the width of the CI obtained through the parametric method, so the nonparametric method dominates.
+In Analysis 1, the bootstrapping approach yielded a 95% CI for the mean of (`r analysis1_alt_nonpara[[1]], analysis1_alt_nonpara[[2]]`), having width `r analysis1_alt_nonpara[[3]]`.  The parametric approach via `t.test()` yielded a 95% CI given by (`r analysis1_alt_para[[1]], analysis1_alt_para[[2]]`), having width `r analysis1_alt_para[[3]]`.  The nonparametric method yielded the smaller confidence interval, having `r patse0(round((analysis1_alt_nonpara[[3]] / analysis1_alt_para[[3]]) * 100, digits = 2), "%"` the width of the CI obtained through the parametric method.  The one-sample *t*-test assumes that the sample is random with independent draws, and that the data are continuous and normally distributed.  Independence and continous data are met, but per Fig. 1, normality is violated, so the parametric approach is not appropriate.  The nonparametric approach dominates.
 
 
 <!-- ### *Analysis #2* -->
