@@ -432,14 +432,14 @@ Figure 8 depcits pairwise relationships between continuous variables.  Strong po
 Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  These indicate that increasing human development and social progress levels correlate with lower levels of infant mortality, and that as infant mortality decreases, life expectancy at birth increases.
 
 ```{r calc_corrplot, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.height = 8}
-corrplot <- ggpairs(data = alldata, columns = c(4, 2, 11, 6:10),
-                    title = "Figure 8.  Correlation Matrix, Continuous Variables")
+corrplot <- ggpairs(data = alldata, columns = c(4:5, 2, 11, 6:10),
+                    title = "Figure 8.  Correlation Matrix")
 corrplot
 ```
 
 ### *Nonparametric and Parametric Analyses*
 
-<!-- ### *Analysis #1* -->
+<!-- ### *Analysis #1*
 
 ```{r analysis1, include = FALSE, echo = FALSE}
 analysis1_nonpara <- SIGN.test(x = alldata$HDIindex, 
@@ -453,7 +453,52 @@ analysis1_para <- t.test(alldata$HDIindex,
 analysis1_para
 ```
 
-For Analysis 1, the 95% confidence interval for the population median was (`r round(analysis1_nonpara$conf.int[1], 4)`, `r round(analysis1_nonpara$conf.int[2], 4)`), and the CI for the population mean was (`r round(analysis1_para$conf.int[1], 4)`, `r round(analysis1_para$conf.int[2], 4)`).
+For Analysis 1, the 95% confidence interval for the population median was (`r round(analysis1_nonpara$conf.int[1], 4)`, `r round(analysis1_nonpara$conf.int[2], 4)`), and the CI for the population mean was (`r round(analysis1_para$conf.int[1], 4)`, `r round(analysis1_para$conf.int[2], 4)`). -->
+
+<!-- ### *Analysis #1 alt* -->
+
+```{r analysis1_alt, include = FALSE, echo = FALSE}
+#analysis1_alt_nonpara
+n <- length(alldata$HDIindex)
+nBS <- 1000
+set.seed(19811221)
+
+BSout <- tibble(BSmean = numeric())
+
+for(bs in 1:nBS){
+  bsHDIindex <- sample(alldata$HDIindex, n, replace = TRUE)
+  BSout[bs, 1] <- mean(bsHDIindex)
+}
+
+meanCI_BS <- tibble(CI_low = numeric(),
+                    CI_high = numeric(),
+                    width = numeric())
+
+meanCI_BS[1, 1] <- round(quantile(BSout$BSmean, 0.025), digits = 4)
+meanCI_BS[1, 2] <- round(quantile(BSout$BSmean, 0.975), digits = 4)
+meanCI_BS$width = meanCI_BS$CI_high - meanCI_BS$CI_low
+
+analysis1_alt_nonpara <- meanCI_BS
+analysis1_alt_nonpara
+
+
+analysis1_alt_para <- t.test(alldata$HDIindex,
+                         alternative = "two.sided",
+                         conf.level = 0.95)
+
+meanCI_ttest <- tibble(CI_low = numeric(),
+                       CI_high = numeric(),
+                       width = numeric())
+
+meanCI_ttest[1, 1] <- round(analysis1_alt_para$conf.int[1], digits = 4)
+meanCI_ttest[1, 2] <- round(analysis1_alt_para$conf.int[2], digits = 4)
+meanCI_ttest$width = meanCI_ttest$CI_high - meanCI_ttest$CI_low
+
+analysis1_alt_para <- meanCI_ttest
+analysis1_alt_para
+```
+
+In Analysis 1, the bootstrapping approach yielded a 95% CI for the mean of (`r analysis1_alt_nonpara[[1]], analysis1_alt_nonpara[[2]]`), having width `r analysis1_alt_nonpara[[3]]`.  The parametric approach via `t.test()` yielded a 95% CI given by (`r analysis1_alt_para[[1]], analysis1_alt_para[[2]]`), having width `r analysis1_alt_para[[3]]`.  The nonparametric method yielded the smaller confidence interval, having `r patse0(round((analysis1_alt_nonpara[[3]] / analysis1_alt_para[[3]]) * 100, digits = 2), "%"` the width of the CI obtained through the parametric method, so the nonparametric method dominates.
 
 
 <!-- ### *Analysis #2* -->
@@ -511,7 +556,7 @@ analysis4_para <- shapiro.test(alldata$happiness)
 analysis4_para
 ```
 
-In Analysis 4, the Lilliefors test yielded p-value $p_{Lilliefors} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{Lilliefors}$.
+In Analysis 4, the Lilliefors test yielded p-value $p_{Lilliefors} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{Lilliefors}$.  Since the objective for this analysis was to test for normality, the parametric test is more appropriate.
 
 
 <!-- ### *Analysis #5* -->
