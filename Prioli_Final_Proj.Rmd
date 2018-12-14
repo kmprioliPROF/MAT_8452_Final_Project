@@ -14,13 +14,6 @@ references:
   issued:
     year: 2018
   title: Gross Domestic Product
-- URL: http://apps.who.int/gho/data/view.main.182?lang=en
-  author:
-  - family: World Health Organization
-  id: who_infantmort
-  issued:
-    year: 2018
-  title: Probability of Dying per 1000 Live Births
 - URL: http://apps.who.int/gho/data/view.main.SDG2016LEXv?lang=en
   author:
   - family: World Health Organization
@@ -28,6 +21,13 @@ references:
   issued:
     year: 2018
   title: Life Expectancy
+- URL: http://apps.who.int/gho/data/view.main.182?lang=en
+  author:
+  - family: World Health Organization
+  id: who_infantmort
+  issued:
+    year: 2018
+  title: Probability of Dying per 1000 Live Births
 - URL: http://hdr.undp.org/en/content/human-development-index-hdi
   author:
   - family:  The United Nations Development Programme
@@ -126,6 +126,7 @@ library(BSDA)            # For SIGN.test()
 library(nortest)         # For lillie.test()
 library(testforDEP)      # For testforDEP("HOEFFD")
 library(jmuOutlier)      # For perm.f.test()
+library(car)             # For leveneTest()
 
 ggthemr("fresh")
 ```
@@ -142,6 +143,8 @@ When studying QoL by country, it is important to understand how each QoL measure
 
 ## **Methods**
 
+### *Data Exploration*
+
 The dataset used in this analysis, titled `alldata`, was generated for the MAT 8790 course (@kmpgit_8790).  It consists of country-level variables for calendar year 2016 as described in Table 1.
 
 **Table 1.  `alldata` dataframe contents.**
@@ -153,14 +156,14 @@ The dataset used in this analysis, titled `alldata`, was generated for the MAT 8
 | @worldbank_gdp   	              | `logGDP`            | Gross Domestic Product, log transform (valued in $US 2018) 	|
 | @un_dvlpt        	              | `HDIrank`           | Human Development Index ranking                  	          |
 | @un_dvlpt        	              | `HDIindex`          | HDI index value (scale of 0:1)                   	          |
-| @un_dvlpt        	              | `HDI_cat`           | HDI index category (5 levels)                    	          |
+| @un_dvlpt        	              | `HDI_cat`           | HDI index category (4 levels)                    	          |
 | @whr             	              | `happiness`         | World Happiness Score (scale of 0:10)            	          |
 | @wef_gender      	              | `gendereq`        	| Gender Equality Index (scale of 0:1)             	          |
 | @who_infantmort  	              | `infantmort`        | Infant mortality rate                            	          |
 | @who_life        	              | `birth_MF`          | Life expectancy at birth, males & females        	          |
 | @who_life        	              | `sixty_MF`          | Life expectancy at 60 years, males & females     	          |
 
-All variables pertain to the calendar year 2016.  Missing values were omitted from the dataset to ensure that the tests of interest could be performed.
+All variables represent data from calendar year 2016.  Countries having missing data were omitted from the dataset to ensure that the tests of interest could be performed.
 
 For each variable except `country`, descriptive statistics were run and a sensible visualization was generated, following which a correlation matrix was produced to examine pairwise relationships between continuous variables.
 
@@ -175,19 +178,19 @@ Based on the data exploration results, five sets of formal hypotheses were gener
 tbl2_test <- c(1:5)
 tbl2_vars <- c("HDIindex",
                "HDIindex, SPI",
-               "logGDP, infantmort",
+               "logGDP, gendereq",
                "happiness",
-               "HDI_cat, infantmort")
-tbl2_null <- c("(No formal hypothesis test) Nonparametric 95% confidence interval for the mean",
+               "HDI_cat, log(infantmort)")
+tbl2_null <- c("(No formal hypothesis test) Nonparametric 95% confidence interval for the population mean",
                "Human development and social progress are not associated",
                "There is no relationship between log(GDP) and gender equality index",
                "Happiness is normally distributed",
-               "Infant mortality rate is the same across levels of human development")
-tbl2_alt <- c("Parametric 95% CI for the mean",
+               "Log infant mortality rate is the same across levels of human development")
+tbl2_alt <- c("(No formal hypothesis test) Parametric 95% confidence interval for the population mean",
               "Human development and social progress are correlated",
               "There is a relationship between log(GDP) and gender equality index",
               "Happiness is not normally distributed",
-              "Infant mortality rate differs by level of human development")
+              "Log infant mortality rate differs by level of human development")
 tbl2_nonpara <- c("Bootstrapping",
                   "Kendall's Tau",
                   "Hoeffding's Test",
@@ -211,9 +214,9 @@ tbl2_kbl <- tbl2 %>%
 tbl2_kbl
 ```
 
-In Analysis #1, bootstrapping and the one-sample *t*-test were employed to find nonparametric and parametric 95% confidence intervals (CIs) for the population mean.  The widths of these intervals were compared, and assumptions required for the *t*-test were assessed.  The bootstrapping CI for the mean was found using 1000 sampling iterations with replacement via `sample()`, and the CI for the mean was found via `t.test()`.
+In Analysis #1, bootstrapping and the one-sample *t*-test were employed to find nonparametric and parametric 95% confidence intervals (CIs) for the population mean.  The widths of these intervals were compared, and assumptions required for the *t*-test were assessed.  The bootstrapping CI for the mean was found using 1,000 sampling iterations with replacement via `sample()`, and the CI for the mean was found via `t.test()`.
 
-Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindx`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.  Additionally, because simulation is the preferred method when ties are present for Kendall's Tau, the variables were first assessed for ties before selecting a method for Kendall's Tau.  The competing hypotheses for this analysis were $H_{0}: \tau = 0$ vs. $H_{A}: \tau \ne 0$ (for Kendall's Tau) and $H_{0}: \rho = 0$ vs. $H_{A}: \rho \ne 0$ (for Pearson's Test).  Both tests were carried out via `cor.test()` using `method = "kendall"` or `method = "pearson"` as appropriate.
+Analysis #2 was motivated by the correlation matrix analysis, which indicates a linear relationship is likely between `SPI` and `HDIindex`.  Kendall's Tau was chosen as the nonparametric test, with the usual Pearson's test as the parametric alternative.  Both tests assume continuous data and are equipped to detect linear dependence, and employed two-sided alternatives.  Additionally, because simulation is the preferred method when ties are present for Kendall's Tau, the variables were first assessed for ties before selecting a method for Kendall's Tau.  The competing hypotheses for this analysis were $H_{0}: \tau = 0$ vs. $H_{A}: \tau \ne 0$ (for Kendall's Tau) and $H_{0}: \rho = 0$ vs. $H_{A}: \rho \ne 0$ (for Pearson's Test).  Both tests were carried out via `cor.test()` using `method = "kendall"` or `method = "pearson"` as appropriate.
 
 Correlation tests were chosen for Analysis #3 to determine whether log GDP and gender equality were associated.  No obvious relationship was seen between these two variables on the correlation plot.  Hoeffding's Test was selected because it is sensitive to any departure from independence, and Pearson's test was chosen as the parametric comparator.  Both tests employed two-sided alternatives and assume continuous data, and Pearson's test additionally assumes a linear relationship.  For Hoeffding's test, the formal hypotheses tested were $H_{0}:  \Delta = 0$ vs. $H_{A}:  \Delta \ne 0$ where $$\Delta = \int\limits_{X \in x}\int\limits_{Y \in y}[F_{XY}(x, y) - F_{X}(x)F_{Y}(y)]^{2} dF_{XY}(x, y).$$  For Pearson's test, the competing hypotheses were $H_{0}: \rho = 0$ versus $H_{A}: \rho \ne 0$.  These tests were carried out using `testforDEP::testforDEP()` with the options `test = "HOEFFD"` and `test = "PEARSON"` respectively.
 
@@ -248,7 +251,7 @@ omitted <- anti_join(fulldata, alldata, by = "country")
 ```
 
 
-### *Descriptive Statistics and Visualizations*
+### *Data Exploration*
 
 The original dataset represented `r dim(fulldata)[[1]]` countries, and the analytic dataset contained `r dim(alldata)[[1]]` countries after omitting those with missing values.  Of the 94 countries omitted, 26 were highly developed by HDI category, 20 were in the low developmental category, and 18 had unknown HDI category (Table 3).
 
@@ -427,7 +430,7 @@ grid.arrange(lifeexp_birth_box, lifeexp_sixty_box,
                             x = 0.025, hjust = 0))
 ```
 
-Figure 8 depcits pairwise relationships between continuous variables.  Strong positive linear relationships are seen between `HDIindex` and `SPI`, `HDIindex` and `birth_MF`, and `SPI` and `birth_MF`, indicating that higher levels of social progress and human development generally correlate with a longer life expectancy at birth.  Additionally, positive linear relationships are seen between `happiness` and `birth_MF`, between `happiness` and `HDIindex`, and between `happiness` and `SPI`, indicating that increasing levels of human development and social progress generally lead to increased happiness (though there is considerable spread in the data), and that happiness and longevity may also be correlated.
+Figure 8 depcits pairwise relationships between these variables.  Strong positive linear relationships are seen between `HDIindex` and `SPI`, `HDIindex` and `birth_MF`, and `SPI` and `birth_MF`, indicating that higher levels of social progress and human development generally correlate with a longer life expectancy at birth.  Additionally, positive linear relationships are seen between `happiness` and `birth_MF`, between `happiness` and `HDIindex`, and between `happiness` and `SPI`, indicating that increasing levels of human development and social progress generally lead to increased happiness (though there is considerable spread in the data), and that happiness and longevity may also be correlated.
 
 Strong negative relationships are seen between `infantmort` and `birth_MF`, between `HDIindex` and `infantmort`, and between `SPI` and `infantmort`, though the latter two of these may not necessarily be linear.  These indicate that increasing human development and social progress levels correlate with lower levels of infant mortality, and that as infant mortality decreases, life expectancy at birth increases.
 
@@ -441,7 +444,7 @@ corrplot
 
 <!-- ### *Analysis #1* -->
 
-```{r analysis1_alt, include = FALSE, echo = FALSE}
+```{r analysis1, include = FALSE, echo = FALSE}
 n <- length(alldata$HDIindex)
 nBS <- 1000
 set.seed(19811221)
@@ -481,7 +484,7 @@ analysis1_para <- meanCI_ttest
 analysis1_para
 ```
 
-In Analysis 1, the bootstrapping approach yielded a 95% CI for the mean of (`r analysis1_alt_nonpara[[1]], analysis1_alt_nonpara[[2]]`), having width `r analysis1_alt_nonpara[[3]]`.  The parametric approach via `t.test()` yielded a 95% CI given by (`r analysis1_alt_para[[1]], analysis1_alt_para[[2]]`), having width `r analysis1_alt_para[[3]]`.  The nonparametric method yielded the smaller confidence interval, having `r patse0(round((analysis1_alt_nonpara[[3]] / analysis1_alt_para[[3]]) * 100, digits = 2), "%"` the width of the CI obtained through the parametric method.  The one-sample *t*-test assumes that the sample is random with independent draws, and that the data are continuous and normally distributed.  Independence and continous data are met, but per Fig. 1, normality is violated, so the parametric approach is not appropriate.  The nonparametric approach dominates.
+In Analysis #1, the bootstrapping approach yielded a 95% CI for the mean of (`r analysis1_nonpara[[1]]`, `r analysis1_nonpara[[2]]`), having width `r analysis1_nonpara[[3]]`.  The parametric approach via `t.test()` yielded a 95% CI given by (`r analysis1_para[[1]]`, `r analysis1_para[[2]]`), having width `r analysis1_para[[3]]`.  The nonparametric method gave the smaller confidence interval, having `r paste0(round((analysis1_nonpara[[3]] / analysis1_para[[3]]) * 100, digits = 2), "%")` the width of the CI obtained through the parametric method.  The one-sample *t*-test assumes that the sample is random with independent draws, and that the data are continuous and normally distributed.  Independence and continuous data are met, but per Fig. 1, normality is violated, so the parametric approach is not appropriate.  The nonparametric approach is acceptable.
 
 
 <!-- ### *Analysis #2* -->
@@ -513,7 +516,7 @@ analysis2_para <- cor.test(alldata$SPI, alldata$HDIindex, method = "pearson")
 analysis2_para
 ```
 
-For Analysis 2, ties were not present in either `SPI` or `HDIindex`; thus, Kendall's Tau was tested using the usual `cor.test(x, y, method = "kendall")` approach.  When testing for independence in both the nonparametric and parametrics cases, the *p*-values are less than 0.0001, with correlation coefficients $r_{\tau}$ = `r round(analysis2_nonpara$estimate, digits = 3)[[1]]` and *r* = `r round(analysis2_para$estimate, digits = 3)[[1]]` respectively.  Both are statistically significant and represent strong evidence of a linear relationship between social progress and human developmental level, thus $H_{0}$ was rejected with the conclusion that, at the $\alpha = 0.05$ level, social progress and human development are correlated.  Both tests assume continuous data, which is satisfied, and both yield the same *p*-value.  Both the nonparametric and parametric methods are appropriate.
+For Analysis #2, ties were not present in either `SPI` or `HDIindex`; thus, Kendall's Tau was tested using the usual `cor.test(x, y, method = "kendall")` approach.  When testing for independence in both the nonparametric and parametrics cases, the *p*-values were less than 0.0001, with correlation coefficients $r_{\tau}$ = `r round(analysis2_nonpara$estimate, digits = 3)[[1]]` and *r* = `r round(analysis2_para$estimate, digits = 3)[[1]]` respectively.  Both are statistically significant and represent strong evidence of a linear relationship between social progress and human developmental level, thus $H_{0}$ was rejected with the conclusion that, at the $\alpha = 0.05$ level, social progress and human development are correlated.  Both tests assume continuous data, which is satisfied, and both yield the same *p*-value.  Both the nonparametric and parametric methods are appropriate.
 
 
 <!-- ### *Analysis #3* -->
@@ -526,7 +529,7 @@ analysis3_para <- testforDEP(alldata$logGDP, alldata$gendereq, test = "PEARSON")
 analysis3_para
 ```
 
-When testing for independence in Analysis 3, Hoeffding's test returned $p_{Hoeffding} =$ `r round(analysis3_nonpara@p_value, digits = 4)`, whereas Pearson's test yielded $p_{Pearson} =$ `r round(analysis3_para@p_value, digits = 4)`.  Hoeffding's test led to the rejection of $H_{0}$ (i.e., independence) and the conclusion that, at the $\alpha = 0.05$ level, there is sufficient evidence of an association between log(GDP) and gender equality.  Pearson's test, however, resulted in retaining $H_{0}$ and concluding that, at the $\alpha = 0.05$ level, there is insufficient evidence of an association between log(GDP) and gender equality.  The assumptions of continuous data were met for both tests, but the assumption of linearity failed for Pearson's test, thus the parametric method is inappropriate.
+When testing for independence in Analysis #3, Hoeffding's test returned $p_{Hoeffding} =$ `r round(analysis3_nonpara@p_value, digits = 4)`, whereas Pearson's test yielded $p_{Pearson} =$ `r round(analysis3_para@p_value, digits = 4)`.  Hoeffding's test led to the rejection of $H_{0}$ (i.e., independence) and the conclusion that, at the $\alpha = 0.05$ level, there is sufficient evidence of an association between log(GDP) and gender equality.  Pearson's test, however, resulted in retaining $H_{0}$ and concluding that, at the $\alpha = 0.05$ level, there is insufficient evidence of an association between log(GDP) and gender equality.  The assumptions of continuous data were met for both tests, but the assumption of linearity failed for Pearson's test, thus the parametric method is inappropriate.
 
 
 <!-- ### *Analysis #4* -->
@@ -539,7 +542,7 @@ analysis4_para <- shapiro.test(alldata$happiness)
 analysis4_para
 ```
 
-In Analysis 4, the Lilliefors test yielded p-value $p_{Lilliefors} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test is $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ is retained for both tests and I conclude that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ is much smaller than $p_{Lilliefors}$.  Since the objective for this analysis was to test for normality, the parametric test is more appropriate.
+In Analysis #4, the Lilliefors test yielded p-value $p_{Lilliefors} =$ `r round(analysis4_nonpara$p.value, digits = 3)`, whereas the p-value for the Shapiro-Wilk test was $p_{SW}$ = `r round(analysis4_para$p.value, digits = 3)`.  Both exceed alpha; thus, $H_{0}$ was retained for both tests with the conclusion that there is insufficient evidence to assert that `happiness` is not normally distributed.  Both tests assume a continuous distribution, which is satisfied by the data, and the tests agree, so either the nonparametric or parametric approach is acceptable in this case.  Notably, although neither *p*-value is significant, $p_{SW}$ was much smaller than $p_{Lilliefors}$.  Since the objective for this analysis was to test for normality, the parametric test is more appropriate.
 
 
 <!-- ### *Analysis #5* -->
@@ -551,16 +554,18 @@ analysis5_nonpara
 
 analysis5_para <- aov(as.numeric(HDI_cat) ~ log(infantmort), data = alldata)
 summary(analysis5_para)
+
+analysis5_levene <- leveneTest(log(infantmort) ~ HDI_cat, data = alldata)
 ```
 
-Both the permutation F-test and ANOVA yielded $p < 0.0001$ for Analysis 5.  Since $p < \alpha$, $H_{0}$ was rejected for both the nonparametric and parametric cases, leading to the conclusion that there exists a difference in infant mortality by HDI category.  The assumptions of independence and constant variance are satisfied by the data.  However, per Fig. 10, the ANOVA assumption of normality may be violated for the Medium categorie.  Therefore, the parametric method is inappropriate in this case, and the nonparametric method is retained.
+Both the permutation F-test and ANOVA yielded $p < 0.0001$ for Analysis #5.  Since $p < \alpha$, $H_{0}$ was rejected for both the nonparametric and parametric cases, leading to the conclusion that there exists a difference in infant mortality by HDI category.  The assumptions of independence and constant variance are satisfied by the data, the latter having *p*-value `r round(analysis5_levene[[3]][1], digits = 4)` on Levene's test for homogeneity of variances.  However, per Fig. 9, the ANOVA assumption of normality may be violated for the Medium category.  Therefore, the parametric method is inappropriate in this case, and the nonparametric method is retained.
 
 ```{r analysis5_plot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
 analysis5_plot <- ggplot(data = alldata, aes(x = HDI_cat, y = log(infantmort))) +
   geom_boxplot() +
   xlab("HDI Category") +
   ylab("Infant Mortality Rate, Log Transform") +
-  ggtitle("Figure 10.  Log Infant Mortality Rate by HDI Category")
+  ggtitle("Figure 9.  Log Infant Mortality Rate by HDI Category")
 analysis5_plot
 ```
 
