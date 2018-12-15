@@ -100,7 +100,7 @@ references:
     month: 12
     year: 2018
   title: MAT_8452_Final_Project
-abstract: "BACKGROUND Increasing globalization has generated interest in comparing countries by key quality of life (QoL) measures such as life expectancy, gender equality, and happiness, among others.  When considering how countries compare by QoL, it is vital to understand how the measures are related, if at all, and in what ways the statistical tests chosen affect the results.  This study aimed to explore the distributions of and relationships between QoL measures using both nonparametric and parametric approaches, and to assess which methods were appropriate.  METHODS A dataset containing country names and selected QoL measures for 2016 was explored through descriptive statistics and sensible univariate and bivariate visualizations.  Five sets of hypotheses pertaining to relationships within the data were generated and tested with both nonparametric methods and their parametric equivalents, and results of these parallel analyses and the assumptions they require were compared.  RESULTS Most variables in the study were not normally distributed, and several appeared associated on correlation matrix analysis.  Nonparametric methods dominated, performing acceptably for all five cases, whereas parametric methods were acceptable in only two of the five cases.  CONCLUSION Nonparametric methods represent a powerful, important toolset for use in analyzing data that fails the assumptions needed for traditional parametric methods."
+abstract: "BACKGROUND Increasing globalization has generated interest in comparing countries by key quality of life (QoL) measures such as life expectancy, gender equality, and happiness, among others.  When considering how countries compare by QoL, it is vital to understand how the measures are related, if at all, and in what ways the statistical tests chosen affect the results.  This study aimed to explore the distributions of and relationships between QoL measures using both nonparametric and parametric approaches, and to assess which methods were appropriate.  METHODS A dataset containing country names and selected QoL measures for 2016 was explored through descriptive statistics and sensible univariate and bivariate visualizations.  Six sets of hypotheses pertaining to relationships within the data were generated and tested with both nonparametric methods and their parametric equivalents, and results of these parallel analyses and the assumptions they require were compared.  RESULTS Most variables in the study were not normally distributed, and several appeared associated on correlation matrix analysis.  Parallel tests included two one-sample tests, two tests for correlation, one two-sample test, and one *k*-sample test.  Across all tests performed, nonparametric methods dominated, performing acceptably for all six cases, whereas parametric methods were acceptable in only three cases.  CONCLUSION Nonparametric methods represent a powerful, important toolset for use in analyzing data that fail the assumptions needed for traditional parametric methods."
 ---
 
 
@@ -118,7 +118,7 @@ library(kableExtra)      # For nicer output tables
 library(GGally)          # For ggpairs() correlation matrix
 library(BSDA)            # For SIGN.test()
 library(nortest)         # For lillie.test()
-library(testforDEP)      # For testforDEP("HOEFFD")
+library(testforDEP)      # For testforDEP()
 library(jmuOutlier)      # For perm.f.test()
 library(car)             # For leveneTest()
 
@@ -164,37 +164,42 @@ For each variable except `country`, descriptive statistics were run and a sensib
 
 ### *Nonparametric and Parametric Analyses*
 
-Based on the data exploration results, five sets of formal hypotheses were generated about the data (Table 2), and sensible nonparametric tests and their parametric equivalents were chosen to test these hypotheses.
+Based on the data exploration results, six sets of formal hypotheses were generated about the data (Table 2), and sensible nonparametric tests and their parametric equivalents were chosen to test these hypotheses.
 
 **Table 2.  Analyses Performed**
 
 ```{r generate_table2, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE}
-tbl2_test <- c(1:5)
+tbl2_test <- c(1:6)
 tbl2_vars <- c("HDIindex",
                "HDIindex, SPI",
                "logGDP, gendereq",
                "happiness",
-               "HDI_cat, log(infantmort)")
+               "HDI_cat, log(infantmort)",
+               "HDI_cat, happiness")
 tbl2_null <- c("(No formal hypothesis test) Nonparametric 95% confidence interval for the population mean",
                "Human development and social progress are not associated",
                "There is no relationship between log(GDP) and gender equality index",
                "Happiness is normally distributed",
-               "Log infant mortality rate is the same across levels of human development")
+               "Log infant mortality rate is the same across levels of human development",
+               "The Medium and High HDI category populations have the same scale for happiness")
 tbl2_alt <- c("(No formal hypothesis test) Parametric 95% confidence interval for the population mean",
               "Human development and social progress are correlated",
               "There is a relationship between log(GDP) and gender equality index",
               "Happiness is not normally distributed",
-              "Log infant mortality rate differs by level of human development")
+              "Log infant mortality rate differs by level of human development",
+              "The Medium and High HDI category populations differ in scale for happiness")
 tbl2_nonpara <- c("Bootstrapping",
                   "Kendall's Tau",
                   "Hoeffding's Test",
                   "One-Sample Kolmogorov-Smirnov Test",
-                  "Permutation F-Test")
+                  "Permutation F-Test",
+                  "Two-Sample Wilcoxon Rank-Sum and Ansari-Bradley Tests")
 tbl2_para <- c("One-Sample t-Test",
                "Pearson's Correlation Test",
                "Pearson's Correlation Test",
                "Shapiro-Wilk Test",
-               "ANOVA")
+               "ANOVA",
+               "Two-Sample t-Test and Levene's Test of Homogeneity")
 tbl2 <- as.tibble(cbind(tbl2_test, tbl2_vars, tbl2_null, tbl2_alt, tbl2_nonpara, tbl2_para))
 colnames(tbl2) <- c("Analysis", "Variable(s)", "Null Hypothesis", "Alternative Hypothesis", "Nonparametric Test", "Parametric Test")
 tbl2_kbl <- tbl2 %>% 
@@ -218,7 +223,9 @@ Analysis #4 was chosen because `happiness` appears to have a symmetric, possibly
 
 To test for a difference in infant mortality rate by human development category, Analysis #5 employed the permutation F-test and ANOVA as the nonparametric and parametric tests respectively.  Both tests assume samples are independent with constant variance, and ANOVA additionally assumes a normal distribution.  The log transform of infant mortality rate was used to ensure that the assumption of constant variance would be met.  The competing hypotheses were $H_{0}:$  the cumulative distribution functions (CDFs) for log infant mortality were equal across all four human development levels vs. $H_{A}:$  at least one of these CDFs differs.  The permutation F-test was performed via `jmuOutlier::perm.f.test()` with 1,000 simulations because the sample size was prohibitively large for calculating an exact *p*-value.  The `aov()` function was used for ANOVA testing.
 
-Results of these five paired analyses were compared in the context of the data and assumptions needed.  All tests were performed at level $\alpha = 0.05$ in R.  The dataset, full code, and this report are available in an online repository (@kmpgit).
+In Analysis #6, the aim was to determine if there was a difference in scale for happiness score among the Medium and High HDI categories.  This required two two-sample tests each for the nonparametric and parametric approaches:  a test for difference in location, and a test for difference in scale.  The nonparametric tests employed were the Wilcoxon Rank-Sum Test, with $H_{0}: m_{Medium} = m_{High}$ vs. $H_{A}: m_{Medium} \ne m_{High}$, and the Ansari-Bradley Test, with $H_{0}:$ the populations have the same spread vs. $H_{A}:$ the populations differ in spread.  For the parametric approach, the two-sample *t*-test provided the test of location, assessing $H_{0}:  \mu_{Medium} = \mu_{High}$ vs. $H_{A}:  \mu_{Medium} \ne \mu_{High}$, and Levene's Test for Homogeneity was used to test for a difference in variance, with competing hypotheses $H_{0}:  \sigma^{2}_{Medium} = \sigma^{2}_{High}$ and $H_{A}:  \sigma^{2}_{Medium} \ne \sigma^{2}_{High}$.  The Wilcoxon Rank-Sum test was carried out via `wilcox.test()`, the Ansari-Bradley test via `ansari.test()`, the *t*-test via `t.test()`, and Levene's test via `car::leveneTest()`.  All tests assume independence of observations; the parametric tests further assume normality.
+
+Results of these six paired analyses were compared in the context of the data and assumptions needed.  All tests were performed at level $\alpha = 0.05$ in R.  The dataset, full code, and this report are available in an online repository (@kmpgit).
 
 
 ## **Results**
@@ -563,9 +570,50 @@ analysis5_plot
 ```
 
 
+<!-- ### *Analysis #6* -->
+
+```{r analysis6, include = FALSE, echo = FALSE}
+happiness_med <- alldata %>% 
+  filter(HDI_cat == "Medium") %>% 
+  select(happiness)
+
+happiness_high <- alldata %>% 
+  filter(HDI_cat == "High") %>% 
+  select(happiness)
+
+happiness_medhigh <- alldata %>% 
+  filter(HDI_cat %in% c("Medium", "High")) %>% 
+  select(happiness, HDI_cat)
+
+analysis6_nonpara_median <- wilcox.test(happiness_med$happiness, happiness_high$happiness)
+analysis6_nonpara_median
+
+analysis6_para_mean <- t.test(happiness_med$happiness, happiness_high$happiness)
+analysis6_para_mean
+
+analysis6_nonpara_scale <- ansari.test(happiness_med$happiness, happiness_high$happiness)
+analysis6_nonpara_scale
+
+analysis6_para_variance <- leveneTest(happiness ~ HDI_cat, data = happiness_medhigh)
+analysis6_para_variance
+```
+
+In Analysis #6, both the Wilcoxon Rank-Sum Test and *t*-test were nonsignificant, with $p_{Wilcoxon}$ = `r round(analysis6_nonpara_median$p.value, digits = 4)` and $p_{t}$ = `r round(analysis6_para_mean$p.value, digits = 4)`.  The happiness data meets normality (Fig. 10), so either the nonparametric or parametric method is acceptable.  $H_{0}$ was retained with the conclusion that the happiness score does not differ in location across the Medium and High HDI categories.  Since the assumption of equal location was retained, the tests for difference in scale were performed.  The Ansari-Bradley test was nonsignificant at $p_{AB}$ = `r round(analysis6_nonpara_scale$p.value, digits = 4)`, and Levene's Test was also nonsignificant, having $p_{Levene}$ = `r round(analysis6_para_variance[1, 3], digits = 4)`.  Both tests resulted in failure to reject $H_{0}$ and the conclusion that the happiness score does not differ in scale across the two HDI categories in question.  It is worth noting that visual inspection of Fig. 10 seems to indicate a difference in scale by category, but this was not supported by the Ansari-Bradley and Levene's Test findings.
+
+
+```{r analysis6_plot, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 4}
+analysis6_plot <- ggplot(data = happiness_medhigh, aes(x = HDI_cat, y = happiness)) +
+  geom_boxplot() +
+  xlab("HDI Category") +
+  ylab("Happiness Score") +
+  ggtitle("Figure 10.  Happiness Score by Medium and High HDI Categories")
+analysis6_plot
+```
+
+
 ## **Discussion**
 
-This study assessed performance and appropriateness of nonparametric methods as compared to their parametric counterparts in a series of five analyses.  In all five cases, the nonparametric methods performed acceptably, whereas the parametric methods were only appropriate in 2 (40%) of the cases.  Nonparametric methods are appropriate when analyzing data that violates the assumption of normality, and they can also be applied to normal data, but may be less powerful than the traditional parametric tests.  The dataset used in this study consists of real-world QoL data, many variables of which fail normality.
+This study assessed performance and appropriateness of nonparametric methods as compared to their parametric counterparts in a series of six analyses.  In all six cases, the nonparametric methods performed acceptably, whereas the parametric methods were only appropriate in three of the cases.  Nonparametric methods are appropriate when analyzing data that violates the assumption of normality, and they can also be applied to normal data, but may be less powerful than the traditional parametric tests.  The dataset used in this study consists of real-world QoL data, many variables of which fail normality.
 
 This study is unique in that its aim was to compare methodologies rather than pursue a specific scientific objective.  The open-ended nature of the study led to trying several analytic approaches with this data, many of which are not included in this report.  These analytic explorations were key in developing a deeper understanding of how these QoL measures are distributed and related, which became useful when working with this dataset for the MAT 8790 final project.
 
