@@ -1,13 +1,14 @@
 ---
 title: "README"
 author: "Katherine M. Prioli"
-date: "December 20, 2018"
+date: "December 18, 2018"
 output: html_document
 ---
 
+
 ## **Purpose**
 
-This repo contains the data, full source code, final report, and slides for my MAT 8452 final project.  The objective of this project is to compare nonparametric methods to their parametric equivalents for key quality of life characteristics across countries.
+This repo contains the data, full source code, final report, and slides for my MAT 8452 final project.  The objective of this project was to compare nonparametric methods to their parametric equivalents for key quality of life characteristics across countries.
 
 
 ## **Contents**
@@ -21,6 +22,11 @@ The repo is organized as follows:
 | Prioli_Final_Proj.Rmd                     | Notebook containing source code and report                          |
 | Prioli_Final_Proj.pdf                     | Knitted notebook                                                    |
 | Prioli_Final_Proj.pptx                    | Presentation slides                                                 |
+
+
+## **Related Analyses**
+
+This project used the dataset generated for the MAT 8790 final project, which was a *k*-means clustering analysis designed to understand how the United States compares to other nations for these QoL measures.  Full code and the relevant Shiny app can be found [here](https://github.com/kmprioliPROF/MAT_8790_Final_Project).
 
 
 ## **Data Sources**
